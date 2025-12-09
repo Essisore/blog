@@ -89,19 +89,22 @@
 <script>
   const setupImageViewer = () => {
     const viewer = document.getElementById("image-viewer");
-    const viewerImage = document.getElementById("viewer-image") as HTMLImageElement;
+    const viewerImage = document.getElementById(
+      "viewer-image",
+    ) as HTMLImageElement;
     const closeButton = document.getElementById("close-viewer");
     const backdrop = document.querySelector(".image-viewer-backdrop");
 
     // 为文章中的所有图片添加点击事件
     const articleImages = document.querySelectorAll("article img");
-    
+
     articleImages.forEach((img) => {
-      img.style.cursor = "pointer";
-      img.addEventListener("click", () => {
+      const imageElement = img as HTMLImageElement;
+      imageElement.style.cursor = "pointer";
+      imageElement.addEventListener("click", () => {
         if (viewer && viewerImage) {
-          viewerImage.src = (img as HTMLImageElement).src;
-          viewerImage.alt = (img as HTMLImageElement).alt;
+          viewerImage.src = imageElement.src;
+          viewerImage.alt = imageElement.alt;
           viewer.classList.remove("hidden");
           // 使用 setTimeout 确保过渡动画生效
           setTimeout(() => {
@@ -132,7 +135,11 @@
 
     // 按 ESC 键关闭
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && viewer && !viewer.classList.contains("hidden")) {
+      if (
+        e.key === "Escape" &&
+        viewer &&
+        !viewer.classList.contains("hidden")
+      ) {
         closeViewer();
       }
     });
@@ -144,4 +151,3 @@
   // Astro 页面切换后重新初始化
   document.addEventListener("astro:after-swap", setupImageViewer);
 </script>
-
