@@ -1,5 +1,5 @@
 ---
-import { ViewTransitions } from "astro:transitions";
+import { ClientRouter } from "astro:transitions";
 import Header from "../components/Header.astro";
 import { cn } from "../lib/utils";
 import "../styles/global.css";
@@ -48,6 +48,14 @@ const {
     <!-- Canonical URL -->
     <link rel="canonical" href={canonicalURL} />
 
+    <!-- KaTeX CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+      integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+      crossorigin="anonymous"
+    />
+
     <!-- Primary Meta Tags -->
     <title>{title}</title>
     <meta name="title" content={title} />
@@ -67,12 +75,12 @@ const {
     <meta property="twitter:description" content={description} />
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
 
-    <ViewTransitions />
+    <ClientRouter />
   </head>
   <body
     class="font-sans text-zinc-900 antialiased transition-colors dark:bg-zinc-900 dark:text-zinc-200"
   >
-    <div class={cn("max-w-xl mx-auto p-4", className)}>
+    <div class={cn("max-w-2xl mx-auto p-4", className)}>
       <Header />
       <slot />
     </div>

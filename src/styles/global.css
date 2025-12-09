@@ -58,6 +58,13 @@
     a {
       @apply text-blue-500 underline;
     }
+    /* KaTeX math formulas */
+    .katex-display {
+      @apply my-4 overflow-x-auto overflow-y-hidden;
+    }
+    .katex {
+      @apply text-base;
+    }
     table {
       @apply my-4 w-full table-auto border-collapse text-sm;
       th {
