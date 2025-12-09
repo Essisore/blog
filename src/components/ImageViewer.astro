@@ -1,0 +1,147 @@
+<!-- 图片查看器组件 -->
+<div id="image-viewer" class="image-viewer hidden">
+  <div class="image-viewer-backdrop"></div>
+  <div class="image-viewer-content">
+    <button id="close-viewer" class="close-button" aria-label="关闭">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="size-6"
+      >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+    <img id="viewer-image" src="" alt="" />
+  </div>
+</div>
+
+<style>
+  .image-viewer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+
+  .image-viewer.show {
+    opacity: 1;
+  }
+
+  .image-viewer.hidden {
+    display: none;
+  }
+
+  .image-viewer-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    cursor: pointer;
+  }
+
+  .image-viewer-content {
+    position: relative;
+    max-width: 90vw;
+    max-height: 90vh;
+    z-index: 10000;
+  }
+
+  .close-button {
+    position: absolute;
+    top: -50px;
+    right: 0;
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 8px;
+    transition: opacity 0.2s;
+  }
+
+  .close-button:hover {
+    opacity: 0.7;
+  }
+
+  #viewer-image {
+    max-width: 90vw;
+    max-height: 90vh;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  }
+</style>
+
+<script>
+  const setupImageViewer = () => {
+    const viewer = document.getElementById("image-viewer");
+    const viewerImage = document.getElementById("viewer-image") as HTMLImageElement;
+    const closeButton = document.getElementById("close-viewer");
+    const backdrop = document.querySelector(".image-viewer-backdrop");
+
+    // 为文章中的所有图片添加点击事件
+    const articleImages = document.querySelectorAll("article img");
+    
+    articleImages.forEach((img) => {
+      img.style.cursor = "pointer";
+      img.addEventListener("click", () => {
+        if (viewer && viewerImage) {
+          viewerImage.src = (img as HTMLImageElement).src;
+          viewerImage.alt = (img as HTMLImageElement).alt;
+          viewer.classList.remove("hidden");
+          // 使用 setTimeout 确保过渡动画生效
+          setTimeout(() => {
+            viewer.classList.add("show");
+          }, 10);
+          // 防止页面滚动
+          document.body.style.overflow = "hidden";
+        }
+      });
+    });
+
+    // 关闭查看器的函数
+    const closeViewer = () => {
+      if (viewer) {
+        viewer.classList.remove("show");
+        setTimeout(() => {
+          viewer.classList.add("hidden");
+          document.body.style.overflow = "";
+        }, 300);
+      }
+    };
+
+    // 点击关闭按钮
+    closeButton?.addEventListener("click", closeViewer);
+
+    // 点击背景关闭
+    backdrop?.addEventListener("click", closeViewer);
+
+    // 按 ESC 键关闭
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && viewer && !viewer.classList.contains("hidden")) {
+        closeViewer();
+      }
+    });
+  };
+
+  // 初始化
+  setupImageViewer();
+
+  // Astro 页面切换后重新初始化
+  document.addEventListener("astro:after-swap", setupImageViewer);
+</script>
+
