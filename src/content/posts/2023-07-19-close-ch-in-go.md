@@ -7,12 +7,11 @@ date: "Jul 19 2023"
 原则：
 
 > **don’t close a channel from the receiver side** and don’t close a channel if the channel has multiple concurrent senders.
->
 
 更本质的原则：
 
 > don’t close (or send values to) closed channels.
->
+
 1. 仅有一个 sender 时，直接从 sender 端关闭即可。
 2. N 个 sender，一个 receiver 时：the only receiver says “please stop sending more” by closing an additional signal channel
 3. N 个 sender， M 个 receiver时：any one of them says “let’s end the game” by notifying a moderator to close an additional signal channel

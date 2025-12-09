@@ -30,8 +30,8 @@ select a, b from t1
     left join (select max(c) as maxc from t2) as t2 on true
     where c > maxc;
 ```
-使用 left join 的写法更明确地表达了"获取一次最大值然后与每行比较"的意图，特别是在 t2 为空表时。
 
+使用 left join 的写法更明确地表达了"获取一次最大值然后与每行比较"的意图，特别是在 t2 为空表时。
 
 ### 规则2
 
@@ -56,9 +56,7 @@ select a, b from t1 semi join t2 on t1.c = t2.c
 
 规则1和规则2是去关联化的基石，当E不含关联列时，可以直接将 apply 转换为相应类型的 join。
 
-
 ### 规则3
-
 
 $$
 R \underset{\times}{\mathbf{A}} (\sigma_p E) = \sigma_p(R \underset{\times}{\mathbf{A}} E)
@@ -92,14 +90,13 @@ A：规则3比规则2的适用范围更广，当 E 包含关联列时，我们�
 
 - 当 R 的 id 不为 5，带到右子树计算的结果会被过滤掉，右子树输出空，由于是 CrossApply，当右子树为空时，R的相应的行也不会输出
 - 当 R 的 id 为 5 时，filter 的结果取决与 S.id 是否为 10
-    - S.id 为 10， R 能够输出，并且 S.id 为 10
-    - S.id 不为 10， R 不能输出
+  - S.id 为 10， R 能够输出，并且 S.id 为 10
+  - S.id 不为 10， R 不能输出
 
 所以最终的结果就是输出 R.id 为 5， S.id 为 10 的结果集合。
 
 在对比下面的执行计划，虽然 CrossApply 会生成很多额外的数据，但是最上面的 filter 也能保证只有
 R.id 为 5，S.id 为 10 的结果才会输出。所以这两个计划是等价的。
-
 
 ### 规则4
 
@@ -111,8 +108,8 @@ $$
 
 规则4展示正是投影算子和 cross apply 的交换律。原来 cross apply 会输出 R 的所有列，投影算子上提以后也应该输出 R 的所有列。对于含有关联列的投影操作，也是可以上提的。
 
-
 ### 规则8
+
 $$
 R \underset{\times}{\mathbf{A}} (\mathbf{G}\_{A,F} E) = \mathbf{G}\_{A \cup \text{columns}(R),F}(R \underset{\times}{\mathbf{A}} E)
 $$
@@ -170,13 +167,14 @@ GROUP BY a, b;
 可以看到，结果集变为2行，与等式左边不一致。
 
 ### 规则9
+
 $$
 R \underset{\times}{\mathbf{A}} (\mathbf{G}^1_F E) = \mathbf{G}_{\text{columns}(R),F'}(R \underset{\text{LOJ}}{\mathbf{A}} E)
 $$
 
 规则9描述 scalar agg 和 cross apply 的变换规则，其中 scalar agg 是指没有 group 条件的的聚合算子，即聚合操作作用于整体数据集。
 
-对于聚合操作需要额外注意 `count` 操作，`count(*)` 计算分组中结果集的行数，null 会被视为合法的一行，而 `count(列)` 会忽略 null 值。另外需要注意的是：对于空集，avg，min，max，sum，count(列) 等聚合操作会返回 null，而 count(*) 返回 0。
+对于聚合操作需要额外注意 `count` 操作，`count(*)` 计算分组中结果集的行数，null 会被视为合法的一行，而 `count(列)` 会忽略 null 值。另外需要注意的是：对于空集，avg，min，max，sum，count(列) 等聚合操作会返回 null，而 count(\*) 返回 0。
 
 规则9中，cross apply 会变为 LOJ apply，这主要就是因为对于 scalar agg，即使输入是空集，也会输出一个 NULL。如果我们这里用 LOJ apply，恰好也会得到一样的行为；反之，如果用 cross apply 就会丢失数据。
 
@@ -194,6 +192,7 @@ $$ F(\emptyset) \neq F(\{\textit{NULL}\}) $$
 > ) AS count_orders
 > FROM CUSTOMER
 > ```
+>
 > 设想一下：客户 Eric 没有任何订单，那么这个查询应当返回一个 ['Eric', 0] 的行。但是，当我们应用了规则 (9) 做变换之后，却得到了一个 ['Eric', 1] 的值，结果出错了！
 
 > 变换后的 GroupAgg 无法区分它看到的 NULL 数据到底是 OuterJoin 产生的，还是原本就存在的，有时候，这两种情形在变换前的 ScalarAgg 中会产生不同的结果。
@@ -207,11 +206,9 @@ $$ F(\emptyset) \neq F(\{\textit{NULL}\}) $$
 1. 如何处理嵌套 apply
 2. R 的唯一键如何确定
 
-
 ### 流程图
 
 ![KunDB 子查询去关联化流程图](/assets/images/kundb_subq_decorr.png)
-
 
 我们尝试对逻辑计划按照上述6条规则进行去关联化，当遇到无法完成去关联化的场景，返回原始的执行计划。在实现算法时不能修改原始执行计划。
 
@@ -300,17 +297,16 @@ a|b
 1|4
 ```
 
-
 `R cross join (select a, count(1) from S group by a)` 的结果应当是2行
 
 `select S.a, count(1) from ( R cross join S) group by S.a` 的结果却是1行
-
 
 #### 如何确定 R 的唯一键 ？
 
 在 kundb 目前的实现中，使用 FetchUniqKeys 取回 逻辑计划树R 上的唯一键
 
 如果 R 是一个，
+
 - table scan，那么则返回该表上定义的所有的唯一键
 - filter，则取 filter 的孩子节点的 唯一键。也就是说 filter 不会影响唯一键
 - projection，先取回 projection 孩子的所有唯一键，然后逐个判断每个唯一键的列是否都被完整输出了
@@ -318,31 +314,31 @@ a|b
 - agg，取回孩子的唯一键，判断是否每个唯一键都被完整输出了；判断group by是否完整被输出列包含。对于scalar agg，输出结果集应当不超过一行，选择第一列作为唯一键。
 - 其他，则认为不能保证数据的唯一。 P.S. FetchUniqKeys 的实现并不完善，目前只考虑了上述 logical plan
 
-证明：取 join 左孩子和右孩子的唯一键可以当作  join 结果的唯一键
+证明：取 join 左孩子和右孩子的唯一键可以当作 join 结果的唯一键
 
-即：给定 `R join S`，R.a  是 R 的唯一键，S.a 是 S 的唯一键，证明 (R.a, S.a) 可以唯一确定 R join S 结果的一行
+即：给定 `R join S`，R.a 是 R 的唯一键，S.a 是 S 的唯一键，证明 (R.a, S.a) 可以唯一确定 R join S 结果的一行
 
 假设 R 有 m 行， S 有 n 行
 
 1. inner join
 
-    R join S 的 结果一定是 R cross join S 的子集。如果 (R.a, S.a) 是 cross join 的唯一键，那么其一定也是 inner join 的唯一键。
+   R join S 的 结果一定是 R cross join S 的子集。如果 (R.a, S.a) 是 cross join 的唯一键，那么其一定也是 inner join 的唯一键。
 
-    R cross join S 得到一个 m * n 行的数据，其实也就是 m 个 1 * n 行的数据做并集
-    对于每个 1 * n  数据，S.a 是其唯一键，(R.a，S.a)肯定也能保证唯一性
-    任意两个 1 * n 数据的 R.a 肯定是不同的，所以 R.a 可以区分两个不同的 1* n，S.a 可以区分 1 * n 的 n 条数据，所以 (R.a, S.a) 可以区分 任意两个 1 * N 的 任意两行数据
-    也就是说 (R.a，S.a) 是 cross join 结果集的唯一键
+   R cross join S 得到一个 m _ n 行的数据，其实也就是 m 个 1 _ n 行的数据做并集
+   对于每个 1 _ n 数据，S.a 是其唯一键，(R.a，S.a)肯定也能保证唯一性
+   任意两个 1 _ n 数据的 R.a 肯定是不同的，所以 R.a 可以区分两个不同的 1* n，S.a 可以区分 1 * n 的 n 条数据，所以 (R.a, S.a) 可以区分 任意两个 1 \* N 的 任意两行数据
+   也就是说 (R.a，S.a) 是 cross join 结果集的唯一键
 
 2. left join
 
-    没有条件的 left join 退化为 cross join
-    有 join 条件的 left join 可以转化为 R 和 S inner join 的结果集 Data1 union all 上 R中那些join不上的数据右侧补null的数据集Data‘
-    上面证明了 (R.a, S.a) 是 inner join 的唯一键，同时也容易发现 R.a 是  Data‘  的唯一键
-    从Data1和Data’中各任取一条数据，R.a 一定是不同的（因为左表的一行数据要么join上，要么join不上）
+   没有条件的 left join 退化为 cross join
+   有 join 条件的 left join 可以转化为 R 和 S inner join 的结果集 Data1 union all 上 R中那些join不上的数据右侧补null的数据集Data‘
+   上面证明了 (R.a, S.a) 是 inner join 的唯一键，同时也容易发现 R.a 是 Data‘ 的唯一键
+   从Data1和Data’中各任取一条数据，R.a 一定是不同的（因为左表的一行数据要么join上，要么join不上）
 
 3. semi join
 
-    对于semi join，R.a 就可以 R semi join S 的唯一键
+   对于semi join，R.a 就可以 R semi join S 的唯一键
 
 #### 没有唯一键怎么办？
 

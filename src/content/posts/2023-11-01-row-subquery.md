@@ -27,7 +27,6 @@ row subquery 支持 如下运算符：
 仅在用于比较与 row construct比较的时候才可以使用返回多列的子查询。
 
 > You may use a subquery that returns multiple columns, if the purpose is row comparison.
->
 
 row subquery 仅支持多余一列的子查询，以下查询返回语法错误：
 
@@ -39,9 +38,7 @@ MySQL 建议不要混用 row constructor 和 AND/OR 表达式：
 
 > Thus, for better results, avoid mixing row constructors with AND/OR expressions. Use one or the other.
 >
->
 > https://dev.mysql.com/doc/refman/8.0/en/row-constructor-optimization.html
->
 
 Multi-Row Subquery
 
@@ -153,7 +150,7 @@ Item_singlerow_subselect 可以是 scalar subquery，也可以是 row subquery�
 
 **执行阶段，**在 FilterIterator::Read() 函数中会调用 `m_condition->val_int()` 对 where 表达式进行评估，然后就会调用到 `Item_func_eq::val_int()` ，紧接着 `cmp.compare()` 。cmp 在 set_cmp_func 时已经生成好了，对于我们的例子，实际上调用的是 compare_row 函数，
 
-compare_* 系列函数返回 0 表示左右参数相等，1 表示左边大，-1 表示左边小。
+compare\_\* 系列函数返回 0 表示左右参数相等，1 表示左边大，-1 表示左边小。
 
 compare_row 的核心逻辑即依次比较每个 field，如果某个 field 不为 0，则后面的无须再比。
 
@@ -163,18 +160,17 @@ compare_row 的核心逻辑即依次比较每个 field，如果某个 field 不�
 
 - Item 的 m_nullable， null_value
 
-    m_nullable 表示一个表达式的结果是否有可能是 NULL，这个参数是在编译时期设置的，所以表示的是一种可能性，在 optimize 阶段也会进行调整；而 null_value 则表示的是该表达式的结果是否为 NULL。
+  m_nullable 表示一个表达式的结果是否有可能是 NULL，这个参数是在编译时期设置的，所以表示的是一种可能性，在 optimize 阶段也会进行调整；而 null_value 则表示的是该表达式的结果是否为 NULL。
 
 - Item_bool_func2 的 abort_on_null
 
-    abort_on_null 告诉 compare 函数，在遇到 null 值是否需要终止比较，通常意味着无须区分 null 和 false 的场景。
+  abort_on_null 告诉 compare 函数，在遇到 null 值是否需要终止比较，通常意味着无须区分 null 和 false 的场景。
 
-    其他的 bool_func 中也有名称相同的变量，如 Item_cond_and。对于 a and b and c and …，如果 b 的结果为 null，且这个表达式位于 where 条件中，此时 abort_on_null 为 true，那么 Item_cond_and::val_int 会直接返回 false。
+  其他的 bool_func 中也有名称相同的变量，如 Item_cond_and。对于 a and b and c and …，如果 b 的结果为 null，且这个表达式位于 where 条件中，此时 abort_on_null 为 true，那么 Item_cond_and::val_int 会直接返回 false。
 
 - Arg_comparator 的 set_null
 
-    set_null 表示在比较过程中如果遇到 null，需要记录到 owner 当中， owner 简单的认为是 compare 两个参数的 parent，也是一个 Item 类型。所谓的记录到 owner 当中，其实就是将 owner 的 null_value 设置为 true。
-
+  set_null 表示在比较过程中如果遇到 null，需要记录到 owner 当中， owner 简单的认为是 compare 两个参数的 parent，也是一个 Item 类型。所谓的记录到 owner 当中，其实就是将 owner 的 null_value 设置为 true。
 
 compare_row 时，当 owner 的 null_value 为 true 时，≠ 会忽略并继续往下比，而 <, <=, > 以及 ≥ 会直接返回 -1，而其他的 op 则取决于 abort_on_null 变量。
 
@@ -193,18 +189,17 @@ REF，https://bugs.mysql.com/bug.php?id=27704
 
 - 对 if 表达式的 arg0 调用 apply_is_true
 
-    > [`IF(***expr1***,***expr2***,***expr3***)](https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html#function_if)`
-    If **`*expr1*`** is `TRUE` (**`*expr1*** <> 0` and **`*expr1*** IS NOT NULL`), [`IF()`](https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html#function_if) returns **`*expr2*`**. Otherwise, it returns **`*expr3*`**.
-    >
+  > [`IF(**_expr1_**,**_expr2_**,**_expr3_**)](https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html#function_if)`
+If **`_expr1_`** is `TRUE` (**`\*expr1**\* <> 0` and **`*expr1*** IS NOT NULL`), [`IF()`](https://dev.mysql.com/doc/refman/8.0/en/flow-control-functions.html#function_if) returns **`*expr2*`**. Otherwise, it returns **`*expr3*`**.
 
-    因此对于函数 if 来说，第一个参数为 null 和 false 是一致的。在 `Item_func_if::fix_fields` 时调用。
+  因此对于函数 if 来说，第一个参数为 null 和 false 是一致的。在 `Item_func_if::fix_fields` 时调用。
 
 - 对于 having 和 where 子句中的表达式调用 apply_is_true
 
-    where 和 having 条件中的表达式不区分 false 和 null。在 `PTI_context::do_itemize` 中会调用 apply_is_true。
+  where 和 having 条件中的表达式不区分 false 和 null。在 `PTI_context::do_itemize` 中会调用 apply_is_true。
 
 - join 的 on 条件中
 
-    `add_join_on` 中会对 join condition apply_is_true
+  `add_join_on` 中会对 join condition apply_is_true
 
 - 其余在 mysql 优化阶段，仍需要维护好表达式的 abort_on_null 等属性

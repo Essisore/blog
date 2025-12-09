@@ -22,53 +22,50 @@ merge into 主要分为三个主要分支：主分主，update 分支和 insert 
 
 - update 分支：当 on 子句中指定的条件返回 true 时，会执行 update 分支，会根据 set 子句指定的表达式对 target 表进行更新，也可以指定 where 子句，这样只会对 target 中满足 where 条件的行进行更新。
 
-    不能 update 在 on 条件中出现的列。
+  不能 update 在 on 条件中出现的列。
 
-    在 update 分支中可以指定 delete 操作：
+  在 update 分支中可以指定 delete 操作：
 
-    - delete 不会删除 insert 插入的数据
+  - delete 不会删除 insert 插入的数据
 
-        > The only rows affected by this clause are those rows in the destination table that are updated by the merge operation.
-        >
-    - delete 的 where 条件是根据 update 之后的数据进行评估的
+    > The only rows affected by this clause are those rows in the destination table that are updated by the merge operation.
 
-        > The `DELETE` `WHERE` condition evaluates the updated value, not the original value that was evaluated by the `UPDATE` `SET` ... `WHERE` condition.
-        >
-    - 源表中没有被 join 选取的行，即使满足 delete 条件，也不会被删除
+  - delete 的 where 条件是根据 update 之后的数据进行评估的
 
-        > If a row of the destination table meets the `DELETE` condition but is not included in the join defined by the `ON` clause, then it is not deleted.
-        >
+    > The `DELETE` `WHERE` condition evaluates the updated value, not the original value that was evaluated by the `UPDATE` `SET` ... `WHERE` condition.
+
+  - 源表中没有被 join 选取的行，即使满足 delete 条件，也不会被删除
+
+    > If a row of the destination table meets the `DELETE` condition but is not included in the join defined by the `ON` clause, then it is not deleted.
 
 ![update 分支](/assets/images/merge-into-syntax-update.png)
 
 - insert 分支：当 on 子句返回 false 时，执行 insert 分支。如果 on 子句的条件是 **constant filter predicate**，如 `ON` (`0=1`)，Oracle 会将 merge 转为 insert，避免 join。同样，insert 也可以指定 where 子句，当满足条件时才会插入。
-    - insert 可能会导致主键冲突
 
-        ```sql
-        -- t1: (1,2)，t2: (1,3) && t1.a is primary key
-        merge into t1 using t2 on (t1.b = t2.b)
-        when not matched then insert values(t2.a, t2.b);
-        ```
+  - insert 可能会导致主键冲突
 
-    - merge 的 delete 和 update 对 insert 可见
+    ```sql
+    -- t1: (1,2)，t2: (1,3) && t1.a is primary key
+    merge into t1 using t2 on (t1.b = t2.b)
+    when not matched then insert values(t2.a, t2.b);
+    ```
 
-        ```sql
-        -- t1: (1,2)， t2: (1,3),(2,2) && t1.a is primary key
-        merge into t1 using t2 on (t1.b = t2.b)
-        when matched then update set a = t2.a [delete where a = 2]
-        when not matched then insert values(t2.a, t2.b);
-        ```
+  - merge 的 delete 和 update 对 insert 可见
+
+    ```sql
+    -- t1: (1,2)， t2: (1,3),(2,2) && t1.a is primary key
+    merge into t1 using t2 on (t1.b = t2.b)
+    when matched then update set a = t2.a [delete where a = 2]
+    when not matched then insert values(t2.a, t2.b);
+    ```
 
 ![insert 分支](/assets/images/merge-into-syntax-insert.png)
-
-
 
 其他需要注意的地方：
 
 - merge是一个确定性的陈述，无法在同一 merge 语句中多次更新目标表的同一行
 
-    需要 Single Join，或者 merge 算子进行 runtime 检测
-
+  需要 Single Join，或者 merge 算子进行 runtime 检测
 
 ### merge 执行
 
@@ -88,6 +85,7 @@ WHEN NOT MATCHED THEN
      INSERT(product_name, product_type, unit_price, modified_date)
      VALUES(src.product_name, src.product_type, src.unit_price, SYSDATE);
 ```
+
 ![merge into示例](/assets/images/merge-into-example.png)
 
 merge 首先会 perform 一个 left join，即 source RIGHT OUTER JOIN target ON match_condtion，并以 left join 的数据为输入，进入 merge 的处理流程。
@@ -118,7 +116,7 @@ endfor
 
 ## REF
 
-- [Merge (SQL)](https://en.wikipedia.org/wiki/Merge_(SQL))
+- [Merge (SQL)](<https://en.wikipedia.org/wiki/Merge_(SQL)>)
 - [SQL Language Reference](https://docs.oracle.com/en/database/oracle/oracle-database/12.2/sqlrf/MERGE.html)
-- [OceanBase 的 MERGE INTO 并行实现要点_maray的博客-CSDN博客](https://blog.csdn.net/maray/article/details/131181227)
+- [OceanBase 的 MERGE INTO 并行实现要点\_maray的博客-CSDN博客](https://blog.csdn.net/maray/article/details/131181227)
 - [Best practices for migrating Oracle database MERGE statements to Amazon Aurora PostgreSQL and Amazon RDS PostgreSQL | Amazon Web Services](https://aws.amazon.com/cn/blogs/database/best-practices-for-migrating-oracle-database-merge-statements-to-amazon-aurora-postgresql-and-amazon-rds-postgresql/)

@@ -4,7 +4,6 @@ description: "Debug duckdb using clion"
 date: "Oct 31 2025"
 ---
 
-
 我们从官网下载的 `duckdb` 可执行文件，对应的 CMake Target 为 shell，对应的 main 函数位于 `tools/shell/shell.cpp`
 中。
 

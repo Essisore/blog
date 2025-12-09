@@ -15,10 +15,9 @@ R \ A^\otimes \  E=\bigcup_{r \in R} (\{ r \} \, \otimes E(r) )
 $$
 
 > Apply takes a relational input R and a parameterized expression
-E(r); it evaluates expression E for each row r ∈ R, and
-collects the results.
-where ⊗ is either cross product, left outerjoin, left semijoin, or left antijoin.
->
+> E(r); it evaluates expression E for each row r ∈ R, and
+> collects the results.
+> where ⊗ is either cross product, left outerjoin, left semijoin, or left antijoin.
 
 ```
      apply
@@ -29,7 +28,7 @@ outer    inner
 
 通俗地讲，就是：
 
- **“遍历 outer，对于 outer 当中的每一行 r，带入到 inner 侧，计算表达式 E(r) 的结果，并根据不同 apply 类型决定如何输出数据”**
+**“遍历 outer，对于 outer 当中的每一行 r，带入到 inner 侧，计算表达式 E(r) 的结果，并根据不同 apply 类型决定如何输出数据”**
 
 P.S. 这描述的不正是子查询的计算逻辑嘛
 
@@ -44,9 +43,9 @@ SQL Server 在 sql 语法中提供 cross apply 和 outer apply 支持：
 1. 按照是否依赖外部数据分类：关联子查询、非关联子查询
 2. 按输出数据的形式分类：scalar、column、row、table
 3. 按照作用分类：
-    1. 存在性检测：exists 子查询
-    2. 量化比较：形如 column op [any/all] ( subquery )，op 可以是 >、<、= 等， in子查询
-    3. scalar 子查询：任何标量表达式都可以用 scalar 子查询替代
+   1. 存在性检测：exists 子查询
+   2. 量化比较：形如 column op [any/all] ( subquery )，op 可以是 >、<、= 等， in子查询
+   3. scalar 子查询：任何标量表达式都可以用 scalar 子查询替代
 4. 按照子查询所处的位置：select子查询、from子查询（即 derived table）、where 子查询等
 
 举例：
@@ -76,28 +75,25 @@ select * from t1
 
 ### Apply 算子的类型
 
-- [**anti] semi apply**
+- [**anti] semi apply\*\*
 
-    semi apply：对于 outer 的每一行 r，将 r 代入 inner 中计算 E(r)，如果 E(r) 不为空则输出 r，否则丢弃
+  semi apply：对于 outer 的每一行 r，将 r 代入 inner 中计算 E(r)，如果 E(r) 不为空则输出 r，否则丢弃
 
-    anti semi apply：与 semi apply 相反，如果 E(r) 为空则输出 r，不为空则丢弃
+  anti semi apply：与 semi apply 相反，如果 E(r) 为空则输出 r，不为空则丢弃
 
 - **cross apply**
 
-    对于 outer 的每一行 r，计算 E(r)，并将 r 和 E(r)  join 起来输出
+  对于 outer 的每一行 r，计算 E(r)，并将 r 和 E(r) join 起来输出
 
 - **left outer apply**
 
-    对于 outer 的每一行 r，计算 E(r)，并将 r 和 E(r)  join 起来输出，如果 E(r) 为空，则对 r 进行补空后输出
-
+  对于 outer 的每一行 r，计算 E(r)，并将 r 和 E(r) join 起来输出，如果 E(r) 为空，则对 r 进行补空后输出
 
 > These various forms of Apply have been introduced for convenience, and they contribute to a practical, efficient implementation, but they can all be expressed based on Cross Apply, whose purpose is to abstract parameterization.
->
 
 ## 子查询转换成 Apply 算子
 
 > In general, Left Outer Apply will be used, so that a NULL value is passed up when the correlated subquery returns an empty value.
->
 
 如下面这条 sql：
 
@@ -109,7 +105,7 @@ select * from t1 where exists (select * from t2 where id = t.id);
 
 上述 sql 中，对于 t1 的每一行 r，如果 t2 中存在 id 与 r.id 相等，exists 返回 true，r 就能输出；反之，如果 t2 中不存在 id 与 r.id 相等，那么 r 就不能输出。
 
-这正符合 semi apply 的定义，R 为 t1，E(r) 为 select * from t2 where id = t.id，对于 R 的每一行 r，当 E(r) 为空时，r 被丢弃；当 E(r) 不为空时，输出 r。
+这正符合 semi apply 的定义，R 为 t1，E(r) 为 select \* from t2 where id = t.id，对于 R 的每一行 r，当 E(r) 为空时，r 被丢弃；当 E(r) 不为空时，输出 r。
 
 如果 sql 支持 semi apply 的语法，那么上述 sql 应当等价于：
 
@@ -126,7 +122,7 @@ select * from t1 where id in (select id from t2);
 1. r.id 为 null 时，那么 in 表达式为 null，此时 where 评估为 false，故 r 不输出
 2. r.id 非 null 时，假设其值为 value。要么 t2 的 id 包含 value，此时 in 表达式为 true，输出 r；要么 t2 的 id 不包含 value，且不包含 null，此时 in 表达式时为 false，丢弃 r；要么 t2 的 id 不包含 value，但是包含 null，此时 in 表达式为 null，where 整体为 false，丢弃 r
 
-分析 select * from t1 where exists (select * from t2 where id = t.id); 我们发现两者的输出是一样的。实际上， where .. in 等价于 exists，故也可以用 semi apply 实现。
+分析 select _ from t1 where exists (select _ from t2 where id = t.id); 我们发现两者的输出是一样的。实际上， where .. in 等价于 exists，故也可以用 semi apply 实现。
 
 再看下面这条 sql，与上条 exists 很像，但位置不同：
 
@@ -187,16 +183,16 @@ apply condition 是我们为了解决 in 子查询能够输出 null 而引入的
 
 1. Orthogonal Optimization of Subqueries and Aggregation
 
-    [](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.563.8492&rep=rep1&type=pdf)
+   [](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.563.8492&rep=rep1&type=pdf)
 
 2. The Complete Story of Joins (in HyPer)
 
-    [](https://www.btw2017.informatik.uni-stuttgart.de/slidesandpapers/F1-10-37/paper_web.pdf)
+   [](https://www.btw2017.informatik.uni-stuttgart.de/slidesandpapers/F1-10-37/paper_web.pdf)
 
 3. SQL 子查询的优化
 
-    [SQL 子查询的优化](https://ericfu.me/subquery-optimization/)
+   [SQL 子查询的优化](https://ericfu.me/subquery-optimization/)
 
 4. Parameterized Queries and Nesting Equivalences
 
-    [](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-2000-31.pdf)
+   [](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-2000-31.pdf)

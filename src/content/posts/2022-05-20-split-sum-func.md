@@ -20,7 +20,6 @@ Ref_item_array base_ref_items;
 fields 是一个 deque，而 base_ref_items 是数组。下面这段注释解释了为啥 fields 选用 deque：
 
 > This should ideally be changed into `Mem_root_array<Item *>`, but find_order_in_list() depends on pointer stability (it stores a pointer to an element in referenced_by[]).
->
 
 其中 Ref_item_array 其实是一个类型别名，其真实定义如下：`typedef Bounds_checked_array<Item *> Ref_item_array;` ，本质上就是一个数组。
 
@@ -72,97 +71,97 @@ split_sum_func2 的 3 条路径：
 
 1. 跳过那些 registered 聚合函数
 
-    所谓 registered 聚合函数就是指子查询中的关联聚合函数。 在某些 sql 中，需要在外层计算的聚合函数被称为关联聚合函数。如果调用 split_sum_func2 时正处于子查询的处理逻辑中，那么是不应该拆分关联聚合函数的，所以直接跳过。当然，在处理主查询时不能跳过。
+   所谓 registered 聚合函数就是指子查询中的关联聚合函数。 在某些 sql 中，需要在外层计算的聚合函数被称为关联聚合函数。如果调用 split_sum_func2 时正处于子查询的处理逻辑中，那么是不应该拆分关联聚合函数的，所以直接跳过。当然，在处理主查询时不能跳过。
 
 2. 对于满足以下4个条件之一的，调用 Item 的 split_sum_func 接管处理逻辑，不将其本身放入 fields 中
-    - 本身不是聚合函数，也不是窗口函数，但是却包含聚合函数（某个子表达式是聚合函数）
-    - 不是窗口函数，却包含窗口函数
-    - 空值检查函数，trig_cond 函数
-    - row 函数
+   - 本身不是聚合函数，也不是窗口函数，但是却包含聚合函数（某个子表达式是聚合函数）
+   - 不是窗口函数，却包含窗口函数
+   - 空值检查函数，trig_cond 函数
+   - row 函数
 3. 对于同时满足以下3个条件的，会将其放入 fields 当中，并用 Item_ref 替换它
-    - 聚合函数 或者 包含了列引用
-    - 不是子查询 或者 是标量子查询换句话说，如果是子查询，那只能是标量子查询才满足条件
-    - 不是 Item_ref 或者 是VIEW_REF同理，如果是 Item_ref，那只能 ref 一个 view 才行
+   - 聚合函数 或者 包含了列引用
+   - 不是子查询 或者 是标量子查询换句话说，如果是子查询，那只能是标量子查询才满足条件
+   - 不是 Item_ref 或者 是VIEW_REF同理，如果是 Item_ref，那只能 ref 一个 view 才行
 
 哪些场景会触发 split ？ P.S. 我们稍微修改一下 mysql 源码，将完成 sql 解析之后的 select item list 打印出来（上面这条是原始sql，下面的是 mysql 解析完的样子）。
 
 1. having 条件中有聚合函数时
 
-    例如：
+   例如：
 
-    - having 子句中的 avg(c1) 会以隐藏列的形式添加到 fields当中。
+   - having 子句中的 avg(c1) 会以隐藏列的形式添加到 fields当中。
 
-        ```sql
-        select id from t group by id having avg(c1)<20
-         -- fields为
-         	"avg(`test`.`t`.`c1`),`test`.`t`.`id` AS `id`"
-        ```
+     ```sql
+     select id from t group by id having avg(c1)<20
+      -- fields为
+      	"avg(`test`.`t`.`c1`),`test`.`t`.`id` AS `id`"
+     ```
 
-        添加了 c1。
+     添加了 c1。
 
-    - 另外一个 case，走的是 split_sum_func2 的第二条路径，所以 `+` 表达式并没有添加到 fields 中：
+   - 另外一个 case，走的是 split_sum_func2 的第二条路径，所以 `+` 表达式并没有添加到 fields 中：
 
-        ```sql
-        select id from t group by id having id+avg(c1)<20;
-         -- fields为
-         	"avg(`test`.`t`.`c1`),`test`.`t`.`id` AS `id`"
-        ```
+     ```sql
+     select id from t group by id having id+avg(c1)<20;
+      -- fields为
+      	"avg(`test`.`t`.`c1`),`test`.`t`.`id` AS `id`"
+     ```
 
-        添加了 avg(c1)。
+     添加了 avg(c1)。
 
 2. 主查询中包含来自子查询的聚合函数时（关联聚合函数）（此时不跳过 registered agg）
 
-    因为此时处于 main query 的处理逻辑当中，所以不能跳过关联 agg。如：
+   因为此时处于 main query 的处理逻辑当中，所以不能跳过关联 agg。如：
 
-    ```sql
-    select sum(c1) from t group by id having id > (select max(c2) from t2 group by id having max(avg(t.id)+c2)>10)
-    -- fields为
-    avg(`test`.`t`.`id`),
-    `test`.`t`.`id` AS `id`,
-    sum(`test`.`t`.`c1`) AS `sum(c1)`
-    ```
+   ```sql
+   select sum(c1) from t group by id having id > (select max(c2) from t2 group by id having max(avg(t.id)+c2)>10)
+   -- fields为
+   avg(`test`.`t`.`id`),
+   `test`.`t`.`id` AS `id`,
+   sum(`test`.`t`.`c1`) AS `sum(c1)`
+   ```
 
-    可以看到在 main query 中会添加上 avg(t.id)。
+   可以看到在 main query 中会添加上 avg(t.id)。
 
 3. select 子句中的表达式 **包含 wf** 或者 **不是聚合函数却包含聚合函数** 时
 
-    例如：
+   例如：
 
-    - 添加了 max(id)
+   - 添加了 max(id)
 
-        ```sql
-        select max(id)+1 from t group by c1;
-         -- fields为
-        `test`.`t`.`c1` AS `c1`,
-        max(`test`.`t`.`id`),
-        (max(`test`.`t`.`id`) + 1) AS `max(id)+1`
-        ```
+     ```sql
+     select max(id)+1 from t group by c1;
+      -- fields为
+     `test`.`t`.`c1` AS `c1`,
+     max(`test`.`t`.`id`),
+     (max(`test`.`t`.`id`) + 1) AS `max(id)+1`
+     ```
 
-        添加了 c1，max(id)。
+     添加了 c1，max(id)。
 
-    - 聚合函数里面的内容没有拆
+   - 聚合函数里面的内容没有拆
 
-        ```sql
-        select max(id+1) from t group by c1;
-         -- fields为
-         	"`test`.`t`.`c1` AS `c1`,max((`test`.`t`.`id` + 1)) AS `max(id+1)`"
-        ```
+     ```sql
+     select max(id+1) from t group by c1;
+      -- fields为
+      	"`test`.`t`.`c1` AS `c1`,max((`test`.`t`.`id` + 1)) AS `max(id+1)`"
+     ```
 
-        添加了 c1。
+     添加了 c1。
 
-    - 窗口函数的参数
+   - 窗口函数的参数
 
-        ```sql
-        select c1+first_value(c2*sum(c3/c4)) over() from t;
-         -- fields为
-        `test`.`t`.`c2` AS `c2`,
-        `test`.`t`.`c1` AS `c1`,sum((`test`.`t`.`c3` / `test`.`t`.`c4`)),
-        `test`.`t`.`c2` AS `c2`,
-        first_value((`test`.`t`.`c2` * sum((`test`.`t`.`c3` / `test`.`t`.`c4`)))) OVER (),
-        `test`.`t`.`c1` AS `c1`, (`test`.`t`.`c1` + first_value((`test`.`t`.`c2` * sum((`test`.`t`.`c3` / `test`.`t`.`c4`)))) OVER () ) AS `c1+first_value(c2*sum(c3/c4)) over()`
-        ```
+     ```sql
+     select c1+first_value(c2*sum(c3/c4)) over() from t;
+      -- fields为
+     `test`.`t`.`c2` AS `c2`,
+     `test`.`t`.`c1` AS `c1`,sum((`test`.`t`.`c3` / `test`.`t`.`c4`)),
+     `test`.`t`.`c2` AS `c2`,
+     first_value((`test`.`t`.`c2` * sum((`test`.`t`.`c3` / `test`.`t`.`c4`)))) OVER (),
+     `test`.`t`.`c1` AS `c1`, (`test`.`t`.`c1` + first_value((`test`.`t`.`c2` * sum((`test`.`t`.`c3` / `test`.`t`.`c4`)))) OVER () ) AS `c1+first_value(c2*sum(c3/c4)) over()`
+     ```
 
-        窗口函数会继续 split 其参数，最终添加到 fields 当中的有 c1，窗口函数整体，c2，sum 整体，（最前面的 c2 和 c1 并非 split_sum_func 添加的）
+     窗口函数会继续 split 其参数，最终添加到 fields 当中的有 c1，窗口函数整体，c2，sum 整体，（最前面的 c2 和 c1 并非 split_sum_func 添加的）
 
 4. order by 子句中的表达式 **不是 agg 却包含 agg** 或者 **不是 wf 却包含 wf** 时
 5. wf 中的 order by 语句中的表达式 **不是 agg 却包含 agg** 时

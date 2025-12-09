@@ -15,13 +15,15 @@ undo 日志维护数据的多个版本，借助 undo 日志可以实现多版本
 ### kmstore undo 日志设计
 
 kmstore 的 undo 日志目前包含如下信息：
+
 1. row_id: undo log 对应的数据行
 2. m_type：undo 日志的类型，什么操作产生的 undo 日志
 3. m_ts：undo 的事务 id，也是 cts
-4. older_ts_：上一个操作日志对应的事务号，事务提交后变成 cts
+4. older*ts*：上一个操作日志对应的事务号，事务提交后变成 cts
 5. older_undo_entry：上一个操作的undo日志，用于产生版本链
 
 undo 日志类型有很多，本文主要介绍：
+
 - INSERT：插入日志
 - DELETE：删除日志
 - SELECT_FOR_UPDATE：有锁读
@@ -30,13 +32,13 @@ undo 日志类型有很多，本文主要介绍：
 ## 事务可见性判断
 
 事务开始时获取开始时间戳 sts，提交时获取提交时间戳 cts。sts 和 cts 并非真正的时间戳，而是标识先后顺序的 uint64 类型整数，并且只有低 63 位有效，最高位始终为 0。对于活跃事务，还未提交，所以没有 cts，但其 cts 被我们用来表示事务 id，事务 id 最高位为 1。也就是说，一个 uint64 类型的整数被分为了两个部分，最高位为状态标志，低63位才是时间戳或事务id，如下所示：
+
 ```
 uint64 值 = [1位状态标志][63位时间戳或事务ID]
 ```
 
 这样设计能够保证事务 id（最高位为1）永远大于 sts 和 cts，可以更方便地判断事务的可见性：如果一个事务 a 的 sts 大于另外一个事务 b 的 cts，即事务 a 在事务b 后发生，那么 a 能够看到 b 的修改，
 判断的逻辑就是：`a.sts > b.cts`，如果 b 尚未提交，那么 a.sts 必然小于 b.cts，所以 a 也就无法看到 b 的修改。
-
 
 事务可见性核心逻辑如下所示：
 
@@ -47,9 +49,9 @@ auto canSee = [ & ](uint64 next_undo_ts) -> bool {
 ```
 
 这段代码用于遍历 undo 列表，找到第一个本事务可见的版本，是 kmstore MVCC 核心，含义如下：
+
 1. 本事务的修改对本事务可见
 2. 其他事务修改的版本，如果其提交时间戳（cts）小于当前事务的开始时间戳（sts），即发生在当前事务之前则可见，否则不可见。
-
 
 ## undo 版本链
 
@@ -68,6 +70,7 @@ kmstore 事务的开启是在第一次 lock_tables 阶段。
 ```
 
 代码流程如下：
+
 ```c++
 ha_external_lock -> external_lock --> 创建 DMLTransactionContext
                                   `-> 开启事务 --> 获取 bucket id
@@ -77,6 +80,7 @@ ha_external_lock -> external_lock --> 创建 DMLTransactionContext
 ```
 
 全局事务管理器中维护活跃事务列表和已完成的事务列表：
+
 ```c++
   std::array<std::unique_ptr<TransactionSTSWithLock>, TXN_MAP_BUCKETS> active_txn_map_array_;
   std::array<std::unique_ptr<TransactionCTSWithLock>, TXN_MAP_BUCKETS> finished_txn_map_array_;
@@ -88,10 +92,10 @@ ha_external_lock -> external_lock --> 创建 DMLTransactionContext
 
 通过分桶，实现细粒度锁操作，提升获取 sts 的性能。
 
-
 #### 写入
 
 插入数据流程如下：
+
 ```c++
 ha_write_row -> write_row -> km_row_insert -> InsertRow --> InsertTuple
                                                         |-> PushInsert
@@ -101,6 +105,7 @@ ha_write_row -> write_row -> km_row_insert -> InsertRow --> InsertTuple
 InsertTuple 负责将数据插入行存页，如果行存页空间不足，会尝试获取新的行存页。当数据插入成功以后，会为 Insert 操作生成一个 UndoLogEntry，UndoLogEntry 中保存插入的 row_id，事务id（以 cts 形式）等信息。
 
 insert 生成的 undo 日志，会保存在两个地方：
+
 1. 事务上下文中
 2. insert mapping table 中
 
@@ -109,6 +114,7 @@ insert 生成的 undo 日志，会保存在两个地方：
 insert mapping table 保存数据与版本链的映射关系，每个 row page 对应一个 insert mapping table，当我们往 row page 中插入一行时，也会往 insert mapping table 中插入一行，insert mapping table 保存 row id 和它对应的 undo 日志链。
 
 核心数据结构：
+
 ```c++
 vector<array<UndoLogEntry*, 128>>
 ```
@@ -127,12 +133,10 @@ array<<unordered_map<int, UndoLogEntryHeader*>, 16>
 
 mapping table 包含固定的 bucket，目前为 16，每个 bucket 实际是一个哈希表，保存 row id 和 undo 版本链的头结点。对比可以发现，insert mapping table 的桶数是不固定的，但是每个桶大小是固定的；mapping table 的桶数是固定的，但是桶的大小是不固定的。
 
-
 TODO：
 
 1. 为什么数据结构要这样设计，有什么好处？
 2. 为什么要单独设计一个 insert mapping table？
-
 
 #### 更新
 
@@ -151,11 +155,13 @@ read_record -> km_row_select_row_page_with_mvcc --> build_prev_ver_for_consisten
 通过 select for update，我们往版本链中插入了一个有锁读的 undo 日志，update 更新会找到刚刚 select for update 插入的 undo 日志，然后将 undo 日志的类型由 `SELECT_FOR_UPDATE` 更新为 `INPLACE_UPDATE`。
 
 更新数据的流程如下：
+
 ```c++
 update_row -> km_row_update -> UpdateRowLocked --> GetUndoEntryHead(row_id)
                                                |-> SetType(UndoEntryCode::IN_PLACE_UPDATE);
                                                `-> SetValues(indexed_values);
 ```
+
 update 调用的是 `GetUndoEntryHead` 获取版本链的第一个 undo 日志，这个 undo 日志就是 select for update 生成的。select for update 会加行锁，这样就保证了在更新操作之前，其他事务无法操作该行。
 
 update 的 undo 日志还会记录哪些列被更新了，这些列更新之前的数据是什么，这些信息保存在 `indexed_values` 中，通过 `SetValues` 方法存入 undo 日志。
@@ -174,7 +180,6 @@ delete_row -> km_row_delete --> GetUndoEntryHead(row_id)
 ```
 
 删除操作也会在 undo 日志中记录删除之前的数据。
-
 
 #### 查询
 
@@ -219,6 +224,7 @@ delete_row -> km_row_delete --> GetUndoEntryHead(row_id)
 ```
 
 遍历版本链的过程就是一个简单的 `do..while` 循环，直到找到一个可见版本。可以看到，除了上文中提到的 undo 日志类型以外，kmstore 还有一些其他类型的 undo 日志。对于不同的 undo 日志，有不同的处理逻辑：
+
 - 如果当前是一个 insert 日志，那么它应该就是版本链的最后一个节点，并且 insert 对当前事务不可见，直接返回 `NOT_FOUND`
 - 如果当前是一个 update 日志，那么将它所做的修改记录到 `modifications` 中，如果有多个 update 日志，`modifications` 会被先发生的事务覆盖
 
@@ -227,6 +233,7 @@ delete_row -> km_row_delete --> GetUndoEntryHead(row_id)
 #### 提交事务
 
 事务提交的流程如下：
+
 ```c++
 ha_commit_low -> kmemstore_commit -> TransactionCtx::Commit --> 获取 cts
                                                             |-> CommitTransaction
@@ -239,7 +246,6 @@ ha_commit_low -> kmemstore_commit -> TransactionCtx::Commit --> 获取 cts
 
 - `GCTransaction` 是将这些 undo 日志交给 GC 线程，由 GC 线程回收
 
-
 #### 事务回滚
 
 所谓的事务回滚，就是消除事务产生的所有影响，事务更新了数据，那么就需要将原来的数据重新写回去，整个过程相对于提交事务稍微复杂一点。
@@ -247,6 +253,7 @@ ha_commit_low -> kmemstore_commit -> TransactionCtx::Commit --> 获取 cts
 kmstore 事务回滚的过程，就是找出事务所有的 undo 日志，并且调用 undo 日志的 `UndoLogEntry::RollbackUndoEntry` 函数。
 
 下面的代码是 `RollbackUndoEntry` 的核心逻辑，可以看到，undo 日志的回滚也就是反向操作的过程：
+
 - 对于 insert 的数据，进行标记删除
 - 对于 delete 的数据，去除删除标记
 - 对于 update 的数据，将原来的数据重新写回 row page
@@ -304,11 +311,11 @@ void UndoLogEntry::RollbackUndoEntry() {
 当某个事务对所有事务都可见的时候，它的所有的 undo 日志就可以被回收。
 
 过程如下：
+
 1. 事务完成后，会将 undo 日志保存到完成事务列表中
 2. GC 线程通过遍历活跃事务列表，找出最早开始的事务，将其 sts 记为 `global_min_sts`，
 3. 遍历以完成事务列表，找到所有的 cts 小于 global_min_sts 的事务的 undo 日志
 4. 释放 undo 日志内存，对于 insert undo，还需要将对应的 insert mapping table 置空
-
 
 下面是具体代码细节分析：
 
@@ -354,7 +361,6 @@ class TransactionCTSWithLock {
 
 使用 priority_queue 是为了更方便地找出小于 `global_min_sts` 的事务的 undo。
 
-
 GC 线程会计算全局最小的 sts（global_min_sts），计算 global_min_sts 会遍历活跃事务列表，找出最早开始的事务，将其 sts 记为 global_min_sts，过程如下；
 
 ```c++
@@ -365,6 +371,7 @@ GC 线程会计算全局最小的 sts（global_min_sts），计算 global_min_st
 ```
 
 拿到 global_min_sts 之后，会将遍历完成事务列表，收集可以会被回收的 undo list，启动 `FreeTxnCtxWorker` 任务进行回收处理。
+
 ```c++
     for (size_t i = 0; i < finished_txn_map_array_.size(); ++i) {
       auto &gc_txn_list = finished_txn_map_array_[i]->remove_txn_from_min_heap(global_min_sts);
