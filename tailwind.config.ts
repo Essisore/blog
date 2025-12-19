@@ -7,7 +7,7 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["'Noto Sans SC'", ...defaultTheme.fontFamily.sans],
+        sans: ["'Exo 2'", "'Noto Sans SC'", ...defaultTheme.fontFamily.sans],
         mono: ["'Geist Mono'", ...defaultTheme.fontFamily.mono],
       },
       typography: {

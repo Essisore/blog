@@ -64,9 +64,20 @@ const imageUrl = new URL(image, Astro.site).toString();
       rel="stylesheet"
       media="print"
     />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap"
+    />
+    <link
+      id="font-exo2"
+      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+    />
     <noscript>
       <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Geist+Mono:wght@400;500;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Geist+Mono:wght@400;500;700&family=Exo+2:wght@300;400;500;600;700&display=swap"
         rel="stylesheet"
       />
     </noscript>
@@ -74,8 +85,10 @@ const imageUrl = new URL(image, Astro.site).toString();
       // 优化字体加载
       const notoFont = document.getElementById("font-noto");
       const monoFont = document.getElementById("font-mono");
+      const exo2Font = document.getElementById("font-exo2");
       if (notoFont) notoFont.media = "all";
       if (monoFont) monoFont.media = "all";
+      if (exo2Font) exo2Font.media = "all";
     </script>
 
     <!-- Canonical URL -->
