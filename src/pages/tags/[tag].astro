@@ -1,0 +1,101 @@
+---
+import { getCollection } from "astro:content";
+import { SITE_TITLE } from "../../consts";
+import Layout from "../../layouts/Layout.astro";
+import { formatDate } from "../../lib/utils";
+
+export async function getStaticPaths() {
+  const allPosts = await getCollection("posts");
+  const publishedPosts = allPosts.filter((post) => !post.data.draft);
+  
+  const uniqueTags = [
+    ...new Set(publishedPosts.flatMap((post) => post.data.tags || [])),
+  ].filter(Boolean);
+
+  return uniqueTags.map((tag) => {
+    const filteredPosts = publishedPosts
+      .filter((post) => post.data.tags?.includes(tag))
+      .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+      
+    return {
+      params: { tag },
+      props: { posts: filteredPosts },
+    };
+  });
+}
+
+const { tag } = Astro.params;
+const { posts } = Astro.props;
+
+const pageTitle = `标签: ${tag} - ${SITE_TITLE}`;
+---
+
+<Layout
+  title={pageTitle}
+  description={`标签 #${tag} 下的所有文章`}
+  containerClass="max-w-7xl"
+  className="!p-0"
+>
+  <main class="flex justify-center lg:my-6">
+    <article
+      class="w-full max-w-[210mm] bg-white shadow-2xl dark:bg-zinc-900"
+      style="min-height: 297mm;"
+    >
+      <div class="h-full overflow-auto p-6">
+        <header class="mb-6 flex items-baseline justify-between border-b border-zinc-200 pb-4 dark:border-zinc-700">
+          <div>
+            <h1 class="text-xl font-semibold">
+              <span class="mr-2 text-zinc-500">标签:</span>
+              <span class="text-blue-600 dark:text-blue-400">#{tag}</span>
+            </h1>
+            <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+              共 {posts.length} 篇文章
+            </p>
+          </div>
+          <a
+            href="/tags"
+            class="hidden text-sm text-zinc-500 hover:text-blue-600 hover:underline sm:block"
+          >
+            查看所有标签 &rarr;
+          </a>
+        </header>
+
+        <ul class="m-0 flex list-none flex-col p-0 text-sm" role="list">
+          {
+            posts.map((post) => (
+              <li class="m-0 list-none p-0">
+                <a
+                  href={`/posts/${post.slug}`}
+                  class="group flex flex-col gap-1 py-2 no-underline transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 sm:flex-row sm:justify-between sm:gap-2"
+                >
+                  <span class="font-medium group-hover:text-blue-500">
+                    {post.data.title}
+                  </span>
+                  <span class="whitespace-nowrap font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                    {formatDate(post.data.date)}
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        
+        <div class="mt-8 text-center sm:hidden">
+            <a
+            href="/tags"
+            class="text-sm text-zinc-500 hover:text-blue-600 hover:underline"
+          >
+            查看所有标签 &rarr;
+          </a>
+        </div>
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  /* 覆盖全局 article a 的下划线样式 */
+  article a {
+    text-decoration: none;
+  }
+</style>

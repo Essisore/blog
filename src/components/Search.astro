@@ -1,0 +1,203 @@
+---
+const isDev = import.meta.env.DEV;
+---
+
+<button
+  id="search-trigger"
+  aria-label="搜索"
+  class="flex items-center gap-1 text-zinc-500 transition-colors hover:text-zinc-900 dark:hover:text-zinc-100"
+>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
+    <circle cx="11" cy="11" r="8"></circle>
+    <path d="m21 21-4.3-4.3"></path>
+  </svg>
+  <span class="hidden text-xs sm:inline">Search</span>
+  <kbd
+    class="pointer-events-none hidden h-5 select-none items-center gap-1 rounded border border-zinc-200 bg-zinc-50 px-1.5 font-mono text-[10px] font-medium text-zinc-500 opacity-100 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 sm:flex"
+  >
+    <span class="text-xs">⌘</span>K
+  </kbd>
+</button>
+
+<dialog
+  id="search-dialog"
+  class="backdrop:bg-black/50 backdrop:backdrop-blur-sm m-0 h-screen w-screen max-w-none max-h-none bg-transparent text-zinc-900 dark:text-zinc-100 p-0 z-[100]"
+>
+  <div class="flex min-h-full items-start justify-center p-4 pt-20 sm:pt-32" id="search-click-overlay">
+    <div
+      class="w-full max-w-lg overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
+      id="search-content"
+    >
+      {isDev ? (
+        <div class="p-8 text-center text-sm text-zinc-600 dark:text-zinc-400">
+          <p class="font-medium text-amber-500 mb-2">开发环境不可用</p>
+          <p>搜索功能依赖构建生成的索引。</p>
+          <p class="mt-2 text-xs font-mono bg-zinc-100 dark:bg-zinc-800 p-2 rounded">
+            npm run build && npm run preview
+          </p>
+        </div>
+      ) : (
+        <div id="pagefind-search" class="p-4"></div>
+      )}
+    </div>
+  </div>
+</dialog>
+
+{ !isDev && (
+  <>
+    <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+    <script src="/pagefind/pagefind-ui.js" is:inline></script>
+  </>
+)}
+
+<script is:inline>
+  class SearchController {
+    constructor() {
+      this.dialog = document.getElementById("search-dialog");
+      this.trigger = document.getElementById("search-trigger");
+      this.overlay = document.getElementById("search-click-overlay");
+      this.initialized = false;
+
+      // 绑定 this
+      this.openModal = this.openModal.bind(this);
+      this.closeModal = this.closeModal.bind(this);
+      this.handleKeydown = this.handleKeydown.bind(this);
+      this.handleOverlayClick = this.handleOverlayClick.bind(this);
+
+      this.init();
+    }
+
+    init() {
+      // 点击触发按钮
+      this.trigger?.addEventListener("click", this.openModal);
+
+      // 点击背景关闭
+      this.overlay?.addEventListener("click", this.handleOverlayClick);
+
+      // 键盘快捷键
+      document.addEventListener("keydown", this.handleKeydown);
+    }
+
+    openModal() {
+      if (!this.dialog) return;
+      this.dialog.showModal();
+      this.initPagefind();
+      document.body.style.overflow = "hidden";
+    }
+
+    closeModal() {
+      if (!this.dialog) return;
+      this.dialog.close();
+      document.body.style.overflow = "";
+    }
+
+    handleOverlayClick(e) {
+      if (e.target === this.overlay) {
+        this.closeModal();
+      }
+    }
+
+    handleKeydown(e) {
+      // Cmd+K / Ctrl+K
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        if (this.dialog?.open) {
+          this.closeModal();
+        } else {
+          this.openModal();
+        }
+      }
+      // ESC 关闭 (Dialog 原生支持，但为了保险起见以及配合 body scroll lock)
+      if (e.key === "Escape" && this.dialog?.open) {
+        this.closeModal(); // showModal 的 escape 默认不触发我们自己的 cleanup
+      }
+    }
+
+    initPagefind() {
+      if (this.initialized) return;
+      // 检查 PagefindUI 是否存在 (仅在非 dev 环境加载了 script)
+      if (typeof PagefindUI !== "undefined") {
+        new PagefindUI({
+          element: "#pagefind-search",
+          showSubResults: true,
+          showImages: false,
+          translations: {
+             placeholder: "搜索文章...",
+             clear_search: "清除",
+             zero_results: "没有找到关于 [SEARCH_TERM] 的文章",
+          },
+        });
+        this.initialized = true;
+        
+        // 聚焦输入框
+        setTimeout(() => {
+          const input = document.querySelector("#pagefind-search input");
+          input?.focus();
+        }, 100);
+      }
+    }
+  }
+
+  // 初始化
+  // 1. 立即初始化 (适配 MPA 和 首次加载)
+  new SearchController();
+  
+  // 2. 适配 View Transitions 的后续导航
+  // astro:after-swap 会在页面内容替换后触发
+  document.addEventListener('astro:after-swap', () => {
+    new SearchController();
+  });
+</script>
+
+<style is:global>
+  /* Pagefind UI Customization */
+  #pagefind-search {
+    --pagefind-ui-scale: 0.8;
+    --pagefind-ui-primary: #2563eb;
+    --pagefind-ui-text: #18181b;
+    --pagefind-ui-background: #ffffff;
+    --pagefind-ui-border: #e4e4e7;
+    --pagefind-ui-tag: #f4f4f5;
+    --pagefind-ui-border-width: 1px;
+    --pagefind-ui-border-radius: 8px;
+    --pagefind-ui-image-border-radius: 8px;
+    --pagefind-ui-image-box-ratio: 3 / 2;
+    --pagefind-ui-font: sans-serif;
+  }
+
+  html.dark #pagefind-search {
+    --pagefind-ui-primary: #60a5fa;
+    --pagefind-ui-text: #e4e4e7;
+    --pagefind-ui-background: #18181b;
+    --pagefind-ui-border: #27272a;
+    --pagefind-ui-tag: #27272a;
+  }
+
+  /* 隐藏 Pagefind 水印 */
+  .pagefind-ui__powered-by {
+    display: none !important;
+  }
+  
+  /* 调整搜索框样式 */
+  .pagefind-ui__search-input {
+    font-weight: normal;
+  }
+  
+  .pagefind-ui__result-thumb {
+    display: none;
+  }
+
+  .pagefind-ui__result-inner {
+    margin-top: 0.5rem;
+  }
+</style>

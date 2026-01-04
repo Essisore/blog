@@ -2,7 +2,7 @@
 import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
 import ThemeScript from "../components/ThemeScript.astro";
-import { AUTHOR, SITE_CONFIG, SITE_TITLE } from "../consts";
+import { SITE_CONFIG } from "../consts";
 import { cn } from "../lib/utils";
 
 interface Props {
@@ -14,7 +14,7 @@ interface Props {
   article?: boolean;
 }
 
-const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
 
 const {
   title,

@@ -1,0 +1,107 @@
+---
+import type { GetStaticPaths, Page } from "astro";
+import { type CollectionEntry, getCollection } from "astro:content";
+import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
+import Layout from "../../layouts/Layout.astro";
+import { formatDate } from "../../lib/utils";
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const allPosts = await getCollection("posts");
+  const posts = allPosts
+    .filter((post) => !post.data.draft)
+    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+  return paginate(posts, { pageSize: 15 });
+};
+
+type Props = {
+  page: Page<CollectionEntry<"posts">>;
+};
+
+const { page } = Astro.props;
+const pageTitle = `文章列表 (第 ${page.currentPage} 页) - ${SITE_TITLE}`;
+---
+
+<Layout
+  title={pageTitle}
+  description={SITE_DESCRIPTION}
+  containerClass="max-w-7xl"
+  className="!p-0"
+>
+  <main class="flex justify-center lg:my-6">
+    <article
+      class="w-full max-w-[210mm] bg-white shadow-2xl dark:bg-zinc-900"
+      style="min-height: 297mm;"
+    >
+      <div class="h-full overflow-auto p-6">
+        <header class="mb-6">
+          <h1 class="text-xl font-semibold">文章列表</h1>
+          <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
+            第 {page.currentPage} / {page.lastPage} 页 · 共 {page.total} 篇文章
+          </p>
+        </header>
+
+        <ul class="m-0 flex list-none flex-col p-0 text-sm" role="list">
+          {
+            page.data.map((post) => (
+              <li class="m-0 list-none p-0">
+                <a
+                  href={`/posts/${post.slug}`}
+                  class="group flex flex-col gap-1 py-2 no-underline transition-colors hover:bg-zinc-50 dark:hover:bg-zinc-800 sm:flex-row sm:justify-between sm:gap-2"
+                >
+                  <span class="font-medium group-hover:text-blue-500">
+                    {post.data.title}
+                  </span>
+                  <span class="whitespace-nowrap font-mono text-xs text-zinc-500 dark:text-zinc-400">
+                    {formatDate(post.data.date)}
+                  </span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+
+        <div class="mt-8 flex items-center justify-between border-t border-zinc-200 pt-4 dark:border-zinc-700">
+            <div>
+            {
+                page.url.prev ? (
+                <a
+                    href={page.url.prev}
+                    class="flex items-center gap-1 text-sm text-zinc-600 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+                    上一页
+                </a>
+                ) : null
+            }
+            </div>
+            
+            <span class="text-sm text-zinc-400">
+                {page.currentPage} / {page.lastPage}
+            </span>
+
+            <div>
+            {
+                page.url.next ? (
+                <a
+                    href={page.url.next}
+                    class="flex items-center gap-1 text-sm text-zinc-600 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
+                >
+                    下一页
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                </a>
+                ) : null
+            }
+            </div>
+        </div>
+      </div>
+    </article>
+  </main>
+</Layout>
+
+<style>
+  /* 覆盖全局 article a 的下划线样式 */
+  article a {
+    text-decoration: none;
+  }
+</style>
