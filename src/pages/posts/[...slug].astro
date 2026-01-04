@@ -3,6 +3,7 @@ import { type CollectionEntry, getCollection } from "astro:content";
 import CodeCopyButton from "../../components/CodeCopyButton.astro";
 import HeadingLinks from "../../components/HeadingLinks.astro";
 import ImageViewer from "../../components/ImageViewer.astro";
+import PostTable from "../../components/PostTable.astro";
 import ScrollProgress from "../../components/ScrollProgress.astro";
 import TableOfContents from "../../components/TableOfContents.astro";
 import { SITE_TITLE } from "../../consts";
@@ -88,7 +89,7 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
         </header>
 
         <div class="prose-custom mt-6" itemprop="articleBody">
-          <Content />
+          <Content components={{ table: PostTable }} />
         </div>
       </div>
     </article>

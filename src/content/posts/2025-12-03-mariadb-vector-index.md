@@ -10,7 +10,7 @@ date: "Dec 03 2025"
 
 [MariaDB vector index 实现分析](https://zhuanlan.zhihu.com/p/1904733400474054912) 用通俗易懂的语言描述了 mariadb 的 vector index 实现原理，以及性能分析。核心如下图：
 
-![mariadb 向量索引概览](/assets/images/maria-vector-index-glance.jpg)
+![mariadb 向量索引概览](../../assets/images/maria-vector-index-glance.jpg)
 
 通过这幅图，可以清楚的看出来：
 
@@ -176,7 +176,7 @@ mysql_insert
 
 `FVectorNode` 如下所示：
 
-![FVectorNode UML类图](/assets/images/maria-hnsw-fvectornode.png)
+![FVectorNode UML类图](../../assets/images/maria-hnsw-fvectornode.png)
 
 - ctx：指向 `MHNSW_Share`（下文中介绍），指针类型，8字节
 - vec：保存的是二进制形式的向量，指针，8字节
@@ -187,7 +187,7 @@ mysql_insert
 
 `FVectorNode` 采用了单字节对齐的内存格式，内存布局如下：
 
-![FVectorNode 内存布局](/assets/images/maria-mhnsw-fvector-mem.svg)
+![FVectorNode 内存布局](../../assets/images/maria-mhnsw-fvector-mem.svg)
 
 gref 和 tref 的内存是不属于 FVector 的，它们紧跟在 FVector 的后面：
 
@@ -359,7 +359,7 @@ struct TABLE_SHARE
 
 获取 `MHNSW_Share` 的流程如下：
 
-![获取 MHNSW_Share 流程](/assets/images/maria-mhnsw-acquire.svg)
+![获取 MHNSW_Share 流程](../../assets/images/maria-mhnsw-acquire.svg)
 
 从流程图中也可以看出，thd 中保存的 `MHNSW_Trx` 的优先级是高于 `TABLE_SHARE` 中保存的 `MHNSW_Share` 的。
 
@@ -397,7 +397,7 @@ node->load_from_record; // 读向量索引表，加载 entrypoint
 
 流程如下：
 
-![事务流程调用图](/assets/images/maria-mhnsw-commit.svg)
+![事务流程调用图](../../assets/images/maria-mhnsw-commit.svg)
 
 - 对于写操作，写完之后都会调用 `trans_commit_stmt` 作语句级别的提交
 - 对于 commit 语句，调用 `trans_commit` 提交事务

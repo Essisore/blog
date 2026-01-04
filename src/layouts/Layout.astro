@@ -1,13 +1,14 @@
 ---
+import BaseHead from "../components/BaseHead.astro";
 import Header from "../components/Header.astro";
+import ThemeScript from "../components/ThemeScript.astro";
 import { AUTHOR, SITE_CONFIG, SITE_TITLE } from "../consts";
 import { cn } from "../lib/utils";
-import "../styles/global.css";
 
 interface Props {
   title: string;
   description: string;
-  image?: string;
+  image?: string | ImageMetadata;
   className?: string;
   containerClass?: string;
   article?: boolean;
@@ -23,126 +24,18 @@ const {
   containerClass,
   article = false,
 } = Astro.props;
-
-const imageUrl = new URL(image, Astro.site).toString();
 ---
 
 <!doctype html>
 <html lang="zh-CN">
   <head>
-    <!-- Global Metadata -->
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="generator" content={Astro.generator} />
-
-    <!-- Preconnect to external resources -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
-
-    <!-- Fonts with optimized loading -->
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+    <BaseHead
+      title={title}
+      description={description}
+      image={image}
+      article={article}
     />
-    <link
-      id="font-noto"
-      href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
-      rel="stylesheet"
-      media="print"
-    />
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;700&display=swap"
-    />
-    <link
-      id="font-mono"
-      href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500;700&display=swap"
-      rel="stylesheet"
-      media="print"
-    />
-    <link
-      rel="preload"
-      as="style"
-      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap"
-    />
-    <link
-      id="font-exo2"
-      href="https://fonts.googleapis.com/css2?family=Exo+2:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-      media="print"
-    />
-    <noscript>
-      <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Geist+Mono:wght@400;500;700&family=Exo+2:wght@300;400;500;600;700&display=swap"
-        rel="stylesheet"
-      />
-    </noscript>
-    <script is:inline>
-      // 优化字体加载
-      const notoFont = document.getElementById("font-noto");
-      const monoFont = document.getElementById("font-mono");
-      const exo2Font = document.getElementById("font-exo2");
-      if (notoFont) notoFont.media = "all";
-      if (monoFont) monoFont.media = "all";
-      if (exo2Font) exo2Font.media = "all";
-    </script>
-
-    <!-- Canonical URL -->
-    <link rel="canonical" href={canonicalURL} />
-
-    <!-- RSS Feed -->
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title="RSS"
-      href={new URL("/rss.xml", Astro.site)}
-    />
-
-    <!-- KaTeX CSS -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
-      integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
-      crossorigin="anonymous"
-    />
-
-    <!-- Primary Meta Tags -->
-    <title>{title}</title>
-    <meta name="title" content={title} />
-    <meta name="description" content={description} />
-
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content={article ? "article" : "website"} />
-    <meta property="og:url" content={canonicalURL} />
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:image" content={imageUrl} />
-    <meta property="og:site_name" content={SITE_TITLE} />
-
-    <!-- Twitter -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content={canonicalURL} />
-    <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={imageUrl} />
-
-    <!-- Additional SEO -->
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content={AUTHOR.name} />
-    <meta
-      name="theme-color"
-      content="#ffffff"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#18181b"
-      media="(prefers-color-scheme: dark)"
-    />
+    <ThemeScript />
   </head>
   <body
     class="min-h-screen font-sans text-zinc-900 antialiased transition-colors dark:bg-zinc-900 dark:text-zinc-200"
@@ -153,41 +46,3 @@ const imageUrl = new URL(image, Astro.site).toString();
     </div>
   </body>
 </html>
-
-<script is:inline>
-  function initTheme() {
-    const getTheme = () => {
-      if (typeof localStorage !== "undefined") {
-        const stored = localStorage.getItem("theme");
-        if (stored) return stored;
-      }
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    };
-
-    const setTheme = (theme) => {
-      const isDark = theme === "dark";
-      document.documentElement.classList.toggle("dark", isDark);
-      if (typeof localStorage !== "undefined") {
-        localStorage.setItem("theme", theme);
-      }
-    };
-
-    const theme = getTheme();
-    setTheme(theme);
-
-    // 监听系统主题变化
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = (e) => {
-      if (!localStorage.getItem("theme")) {
-        setTheme(e.matches ? "dark" : "light");
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleChange);
-  }
-
-  initTheme();
-  document.addEventListener("astro:after-swap", initTheme);
-</script>

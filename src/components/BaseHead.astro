@@ -1,0 +1,92 @@
+---
+import "@fontsource/exo-2";
+import "@fontsource/geist-mono";
+import "@fontsource/noto-sans-sc";
+import { getImage } from "astro:assets";
+import { AUTHOR, SITE_TITLE } from "../consts";
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  description: string;
+  image?: string | ImageMetadata;
+  article?: boolean;
+}
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.site);
+
+const {
+  title,
+  description,
+  image,
+  article = false,
+} = Astro.props;
+
+const socialImageURL = await (async () => {
+  if (!image) return undefined;
+  if (typeof image === "string") {
+    return new URL(image, Astro.site).href;
+  }
+  const resized = await getImage({ src: image, format: "png", width: 1200 });
+  return new URL(resized.src, Astro.site).href;
+})();
+---
+
+<!-- Global Metadata -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta name="generator" content={Astro.generator} />
+
+<!-- Canonical URL -->
+<link rel="canonical" href={canonicalURL} />
+
+<!-- RSS Feed -->
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title="RSS"
+  href={new URL("/rss.xml", Astro.site)}
+/>
+
+<!-- KaTeX CSS -->
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"
+  integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV"
+  crossorigin="anonymous"
+/>
+
+<!-- Primary Meta Tags -->
+<title>{title}</title>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content={article ? "article" : "website"} />
+<meta property="og:url" content={canonicalURL} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={socialImageURL} />
+<meta property="og:site_name" content={SITE_TITLE} />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:url" content={canonicalURL} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={socialImageURL} />
+
+<!-- Additional SEO -->
+<meta name="robots" content="index, follow" />
+<meta name="author" content={AUTHOR.name} />
+<meta
+  name="theme-color"
+  content="#ffffff"
+  media="(prefers-color-scheme: light)"
+/>
+<meta
+  name="theme-color"
+  content="#18181b"
+  media="(prefers-color-scheme: dark)"
+/>

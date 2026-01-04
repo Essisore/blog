@@ -1,0 +1,40 @@
+<script is:inline>
+  function initTheme() {
+    const getTheme = () => {
+      if (typeof localStorage !== "undefined") {
+        const stored = localStorage.getItem("theme");
+        if (stored) return stored;
+      }
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    };
+
+    const setTheme = (theme) => {
+      const isDark = theme === "dark";
+      document.documentElement.classList.toggle("dark", isDark);
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem("theme", theme);
+      }
+    };
+
+    const theme = getTheme();
+    setTheme(theme);
+
+    // 监听系统主题变化
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+    const handleChange = (e) => {
+      if (!localStorage.getItem("theme")) {
+        setTheme(e.matches ? "dark" : "light");
+      }
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+  }
+
+  // 立即执行以避免闪烁
+  initTheme();
+  
+  // Astro 页面切换后重新初始化
+  document.addEventListener("astro:after-swap", initTheme);
+</script>

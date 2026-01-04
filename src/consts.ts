@@ -13,9 +13,11 @@ export const AUTHOR = {
   email: "essisore@gmail.com",
 } as const;
 
+import defaultImage from "./assets/blog-placeholder.png";
+
 // 站点配置
 export const SITE_CONFIG = {
   postsPerPage: 10,
   dateFormat: "YYYY-MM-DD",
-  defaultImage: "/static/blog-placeholder.png",
+  defaultImage,
 } as const;
