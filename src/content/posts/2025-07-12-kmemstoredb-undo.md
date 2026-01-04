@@ -2,6 +2,7 @@
 title: "KMemStoreDB Undo 日志与事务可见性"
 description: "介绍 KMemStoreDB 内存引擎 Undo 日志实现与事务可见性判断"
 date: "Jul 12 2025"
+tags: ["Storage Engine", "Transaction", "KunDB"]
 ---
 
 本文介绍我们在 KMemStoreDB（简称：kmstore） 内存引擎中实现的 undo 日志以及基于 undo 日志的事务可见性判断。

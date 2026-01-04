@@ -1,7 +1,8 @@
 ---
 title: "优雅地关闭 go channel"
-description: "学习 MySQL 查询处理的笔记之自然连接"
+description: "如何优雅地在 Go 语言中关闭 channel"
 date: "Jul 19 2023"
+tags: ["Go", "Concurrency"]
 ---
 
 原则：

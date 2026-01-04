@@ -2,6 +2,7 @@
 title: "merge into 调研笔记"
 description: "介绍 merge into"
 date: "Dec 09 2023"
+tags: ["Oracle", "SQL", "Database"]
 ---
 
 a.k.a. Upsert， SQL:2003 标准引入，能够在一条 sql 语句中，根据不同的条件，分别执行 update、delete 和 insert，非常强大好用。

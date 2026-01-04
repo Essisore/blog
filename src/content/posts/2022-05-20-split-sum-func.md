@@ -2,6 +2,7 @@
 title: "MySQL 查询解析笔记之拆分聚合函数"
 description: "学习 MySQL 查询处理的笔记"
 date: "May 20 2022"
+tags: ["MySQL", "SQL Optimization", "Internal"]
 ---
 
 mysql 在解析 sql 的时候会往 fields（可以理解为 select 子句中的表达式） 当中添加一些 hidden item，这些隐藏的表达式并不会输出给客户端。

@@ -2,6 +2,7 @@
 title: "row subquery 调研笔记"
 description: "介绍 row subquery"
 date: "Nov 01 2023"
+tags: ["SQL", "Query Optimization", "Database"]
 ---
 
 ## MySQL 文档

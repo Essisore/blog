@@ -2,6 +2,7 @@
 title: "MariaDB 向量索引源码笔记"
 description: "vector index in mariadb"
 date: "Dec 03 2025"
+tags: ["MariaDB", "Vector Search", "Internal"]
 ---
 
 本文着重于源码实现，基于 mariadb 11.8 版本。

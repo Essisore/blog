@@ -2,6 +2,7 @@
 title: "子查询去关联化实现笔记"
 description: "介绍数据库的子查询去关联化规则以及实现细节"
 date: "Sep 10 2025"
+tags: ["SQL Optimization", "Query Transformation", "Internal"]
 ---
 
 在为 KunDB 实现子查询去关联化算法时主要拜读了 Eric Fu 大佬的[文章](https://ericfu.me/subquery-optimization/)。

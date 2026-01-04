@@ -2,6 +2,7 @@
 title: "ANN benchmark 介绍"
 description: "介绍 ann benchmark"
 date: "Aug 06 2025"
+tags: ["ANN", "Benchmark", "Vector Search"]
 ---
 
 ANN Benchmark (annb) 是一个用于评估近似最近邻（Approximate Nearest Neighbor，简称 ANN）算法性能的标准化基准测试框架，涵盖了众多流行的 ANN 算法。本文面向新手，介绍 annb 的使用方法，内部的实现逻辑等内容。

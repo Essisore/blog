@@ -2,6 +2,7 @@
 title: "Recap Vitess's scale out Design"
 description: "回忆以前看过的 vitess 扩缩容的代码"
 date: "Apr 07 2024"
+tags: ["Vitess", "Resharding", "Scalability"]
 ---
 
 ## 背景

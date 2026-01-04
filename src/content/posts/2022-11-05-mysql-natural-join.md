@@ -2,6 +2,7 @@
 title: "MySQL 查询解析笔记之 natural join"
 description: "学习 MySQL 查询处理的笔记之自然连接"
 date: "Nov 05 2022"
+tags: ["MySQL", "SQL", "Query Processing"]
 ---
 
 本文主要介绍 MySQL 中自然连接（natural join）和 join using 语句实现的原理，源码分析基于 mysql8.0.30 版本。

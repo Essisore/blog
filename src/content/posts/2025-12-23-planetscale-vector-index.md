@@ -2,6 +2,7 @@
 title: "PlanetScale 向量索引设计"
 description: "design of vector index in PlanetScale"
 date: "Dec 03 2025"
+tags: ["PlanetScale", "Vector Search", "Design"]
 ---
 
 本文是《[Larger than RAM Vector Indexes for Relational Databases](https://planetscale.com/blog/larger-than-ram-vector-indexes-for-relational-databases)》的笔记。

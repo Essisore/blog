@@ -1,8 +1,23 @@
+@import "@fontsource/exo-2/400.css";
+@import "@fontsource/exo-2/500.css";
+@import "@fontsource/exo-2/600.css";
+@import "@fontsource/exo-2/700.css";
+@import "@fontsource/geist-mono/400.css";
+@import "@fontsource/geist-mono/500.css";
+@import "@fontsource/noto-sans-sc/400.css";
+@import "@fontsource/noto-sans-sc/500.css";
+@import "@fontsource/noto-sans-sc/600.css";
+@import "@fontsource/noto-sans-sc/700.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  html {
+    font-family: "Exo 2", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+  }
+
   /* 代码高亮主题切换 */
   html.dark .astro-code,
   html.dark .astro-code span {
@@ -145,7 +160,8 @@
     a[href^="http"]::after,
     a[href^="https://"]::after
     {
-      content: " ↗";
+      content: "\00a0↗";
+      display: inline-block;
       font-size: 0.7em;
       opacity: 0.6;
     }

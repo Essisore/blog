@@ -44,16 +44,16 @@ const pageTitle = `标签墙 - ${SITE_TITLE}`;
           sortedTags.length === 0 ? (
             <p class="text-sm text-zinc-500">暂无标签</p>
           ) : (
-            <div class="flex flex-wrap gap-3">
+            <div class="flex flex-wrap gap-2">
               {sortedTags.map(([tag, count]) => (
                 <a
                   href={`/tags/${tag}`}
-                  class="group flex items-center gap-1.5 rounded-full bg-zinc-100 px-3 py-1.5 text-sm transition-colors hover:bg-blue-100 dark:bg-zinc-800 dark:hover:bg-blue-900/30"
+                  class="group flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-sm transition-colors hover:bg-blue-100 dark:bg-zinc-800 dark:hover:bg-blue-900/30"
                 >
                   <span class="font-medium text-zinc-700 group-hover:text-blue-700 dark:text-zinc-300 dark:group-hover:text-blue-300">
                     #{tag}
                   </span>
-                  <span class="rounded-full bg-zinc-200 px-1.5 py-0.5 text-xs text-zinc-500 group-hover:bg-blue-200 group-hover:text-blue-700 dark:bg-zinc-700 dark:group-hover:bg-blue-800 dark:group-hover:text-blue-300 border border-transparent">
+                  <span class="rounded-full bg-zinc-200 px-1.5 py-0.5 text-[0.65rem] text-zinc-500 group-hover:bg-blue-200 group-hover:text-blue-700 dark:bg-zinc-700 dark:group-hover:bg-blue-800 dark:group-hover:text-blue-300 border border-transparent">
                     {count}
                   </span>
                 </a>

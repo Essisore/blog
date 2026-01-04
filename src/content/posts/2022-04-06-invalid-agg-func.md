@@ -2,6 +2,7 @@
 title: "非法的聚合函数"
 description: "本文主要介绍 mysql 是如何解析聚合函数的"
 date: "Apr 06 2022"
+tags: ["MySQL", "SQL", "Diagnostics"]
 ---
 
 本文基于 mysql(8.0.28) 源代码对于 `class Item_sum` 的说明编写，纯属个人理解，如有错误，恳请指证。这段说明也可以在 mysql 的 docxygen 文档中找到：[Detailed Description](https://dev.mysql.com/doc/dev/mysql-server/latest/classItem__sum.html#details)， 如果可能，还请参阅 mysql 的官方注释。

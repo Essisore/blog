@@ -12,7 +12,7 @@ const sortedPosts = allPosts
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 // 分页配置
-const pageSize = 15;
+const pageSize = 20;
 const posts = sortedPosts.slice(0, pageSize);
 const totalPages = Math.ceil(sortedPosts.length / pageSize);
 const hasNextPage = totalPages > 1;
@@ -28,7 +28,7 @@ const pageTitle = `文章列表 - ${SITE_TITLE}`;
 >
   <main class="fixed bottom-0 left-0 right-0 top-7 flex items-center justify-center p-4 lg:p-6">
     <article
-      class="flex h-full w-full max-w-4xl flex-col bg-white shadow-2xl dark:bg-zinc-900"
+      class="flex h-full w-full max-w-[210mm] flex-col bg-white shadow-2xl dark:bg-zinc-900"
     >
       <div class="flex h-full flex-col p-6">
         <header class="flex-shrink-0 mb-6">

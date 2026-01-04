@@ -2,6 +2,7 @@
 title: "工作中的小故事之索引"
 description: "那些钻牛角尖的时刻"
 date: "Jun 09 2023"
+tags: ["Indexing", "Performance", "Debugging"]
 ---
 
 ## 神奇的现象

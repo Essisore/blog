@@ -2,6 +2,7 @@
 title: "HNSW 索引实现（faiss）"
 description: "学习 faiss HNSW 索引的笔记"
 date: "Oct 22 2025"
+tags: ["HNSW", "Vector Search", "FAISS"]
 ---
 
 HNSW（Hierarchical Navigable Small World，分层可导航小世界图）是向量搜索领域中最基础和常用的一种索引结构。

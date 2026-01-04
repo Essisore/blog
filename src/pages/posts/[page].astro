@@ -11,7 +11,7 @@ export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
     .filter((post) => !post.data.draft)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-  return paginate(posts, { pageSize: 15 });
+  return paginate(posts, { pageSize: 20 });
 };
 
 type Props = {
@@ -30,7 +30,7 @@ const pageTitle = `文章列表 (第 ${page.currentPage} 页) - ${SITE_TITLE}`;
 >
   <main class="fixed bottom-0 left-0 right-0 top-7 flex items-center justify-center p-4 lg:p-6">
     <article
-      class="flex h-full w-full max-w-4xl flex-col bg-white shadow-2xl dark:bg-zinc-900"
+      class="flex h-full w-full max-w-[210mm] flex-col bg-white shadow-2xl dark:bg-zinc-900"
     >
       <div class="flex h-full flex-col p-6">
         <header class="flex-shrink-0 mb-6">

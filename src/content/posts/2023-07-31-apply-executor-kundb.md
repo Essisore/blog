@@ -2,6 +2,7 @@
 title: "apply 算子的实现笔记"
 description: "介绍数据库的 apply 算子以及如何实现"
 date: "Jul 31 2023"
+tags: ["Database", "Executor", "KunDB"]
 ---
 
 ## 介绍
@@ -181,18 +182,7 @@ apply condition 是我们为了解决 in 子查询能够输出 null 而引入的
 
 ## 参考：
 
-1. Orthogonal Optimization of Subqueries and Aggregation
-
-   [](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.563.8492&rep=rep1&type=pdf)
-
-2. The Complete Story of Joins (in HyPer)
-
-   [](https://www.btw2017.informatik.uni-stuttgart.de/slidesandpapers/F1-10-37/paper_web.pdf)
-
-3. SQL 子查询的优化
-
-   [SQL 子查询的优化](https://ericfu.me/subquery-optimization/)
-
-4. Parameterized Queries and Nesting Equivalences
-
-   [](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-2000-31.pdf)
+1. [Orthogonal Optimization of Subqueries and Aggregation](https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.563.8492&rep=rep1&type=pdf)
+2. [The Complete Story of Joins (in HyPer)](https://www.btw2017.informatik.uni-stuttgart.de/slidesandpapers/F1-10-37/paper_web.pdf)
+3. [SQL 子查询的优化](https://ericfu.me/subquery-optimization/)
+4. [Parameterized Queries and Nesting Equivalences](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/tr-2000-31.pdf)

@@ -17,7 +17,7 @@ import defaultImage from "./assets/blog-placeholder.png";
 
 // 站点配置
 export const SITE_CONFIG = {
-  postsPerPage: 10,
+  postsPerPage: 20,
   dateFormat: "YYYY-MM-DD",
   defaultImage,
 } as const;
