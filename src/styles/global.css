@@ -15,7 +15,12 @@
 
 @layer base {
   html {
-    font-family: "Exo 2", "Noto Sans SC", system-ui, -apple-system, sans-serif;
+    font-family:
+      "Exo 2",
+      "Noto Sans SC",
+      system-ui,
+      -apple-system,
+      sans-serif;
   }
 
   /* 代码高亮主题切换 */
@@ -178,23 +183,23 @@
     table {
       @apply my-2 w-full table-auto border-collapse text-xs;
     }
-    
+
     th {
       @apply border-b p-2 text-left font-medium dark:border-zinc-700;
       white-space: normal;
     }
-    
+
     td {
       @apply border-b bg-zinc-50 p-2 dark:border-zinc-700 dark:bg-zinc-800;
       white-space: normal;
     }
-    
+
     /* Mobile optimization */
     @media (max-width: 640px) {
       table {
         font-size: 0.7rem;
       }
-      
+
       th,
       td {
         @apply px-1.5 py-1.5;

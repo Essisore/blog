@@ -24,7 +24,10 @@ export async function getStaticPaths() {
       // 列表顺序：新 -> 旧
       // 上一篇（较新）：index - 1
       // 下一篇（较旧）：index + 1
-      prevPost: index + 1 < publishedPosts.length ? publishedPosts[index + 1] : undefined,
+      prevPost:
+        index + 1 < publishedPosts.length
+          ? publishedPosts[index + 1]
+          : undefined,
       nextPost: index > 0 ? publishedPosts[index - 1] : undefined,
     },
   }));

@@ -31,34 +31,41 @@ const isDev = import.meta.env.DEV;
 
 <dialog
   id="search-dialog"
-  class="backdrop:bg-black/50 backdrop:backdrop-blur-sm m-0 h-screen w-screen max-w-none max-h-none bg-transparent text-zinc-900 dark:text-zinc-100 p-0 z-[100]"
+  class="z-[100] m-0 h-screen max-h-none w-screen max-w-none bg-transparent p-0 text-zinc-900 backdrop:bg-black/50 backdrop:backdrop-blur-sm dark:text-zinc-100"
 >
-  <div class="flex min-h-full items-start justify-center p-4 pt-20 sm:pt-32" id="search-click-overlay">
+  <div
+    class="flex min-h-full items-start justify-center p-4 pt-20 sm:pt-32"
+    id="search-click-overlay"
+  >
     <div
       class="w-full max-w-lg overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-2xl dark:border-zinc-700 dark:bg-zinc-900"
       id="search-content"
     >
-      {isDev ? (
-        <div class="p-8 text-center text-sm text-zinc-600 dark:text-zinc-400">
-          <p class="font-medium text-amber-500 mb-2">开发环境不可用</p>
-          <p>搜索功能依赖构建生成的索引。</p>
-          <p class="mt-2 text-xs font-mono bg-zinc-100 dark:bg-zinc-800 p-2 rounded">
-            npm run build && npm run preview
-          </p>
-        </div>
-      ) : (
-        <div id="pagefind-search" class="p-4"></div>
-      )}
+      {
+        isDev ? (
+          <div class="p-8 text-center text-sm text-zinc-600 dark:text-zinc-400">
+            <p class="mb-2 font-medium text-amber-500">开发环境不可用</p>
+            <p>搜索功能依赖构建生成的索引。</p>
+            <p class="mt-2 rounded bg-zinc-100 p-2 font-mono text-xs dark:bg-zinc-800">
+              npm run build && npm run preview
+            </p>
+          </div>
+        ) : (
+          <div id="pagefind-search" class="p-4" />
+        )
+      }
     </div>
   </div>
 </dialog>
 
-{ !isDev && (
-  <>
-    <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
-    <script src="/pagefind/pagefind-ui.js" is:inline></script>
-  </>
-)}
+{
+  !isDev && (
+    <>
+      <link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+      <script src="/pagefind/pagefind-ui.js" is:inline />
+    </>
+  )
+}
 
 <script is:inline>
   class SearchController {
@@ -132,13 +139,13 @@ const isDev = import.meta.env.DEV;
           showSubResults: true,
           showImages: false,
           translations: {
-             placeholder: "搜索文章...",
-             clear_search: "清除",
-             zero_results: "没有找到关于 [SEARCH_TERM] 的文章",
+            placeholder: "搜索文章...",
+            clear_search: "清除",
+            zero_results: "没有找到关于 [SEARCH_TERM] 的文章",
           },
         });
         this.initialized = true;
-        
+
         // 聚焦输入框
         setTimeout(() => {
           const input = document.querySelector("#pagefind-search input");
@@ -151,10 +158,10 @@ const isDev = import.meta.env.DEV;
   // 初始化
   // 1. 立即初始化 (适配 MPA 和 首次加载)
   new SearchController();
-  
+
   // 2. 适配 View Transitions 的后续导航
   // astro:after-swap 会在页面内容替换后触发
-  document.addEventListener('astro:after-swap', () => {
+  document.addEventListener("astro:after-swap", () => {
     new SearchController();
   });
 </script>
@@ -187,12 +194,12 @@ const isDev = import.meta.env.DEV;
   .pagefind-ui__powered-by {
     display: none !important;
   }
-  
+
   /* 调整搜索框样式 */
   .pagefind-ui__search-input {
     font-weight: normal;
   }
-  
+
   .pagefind-ui__result-thumb {
     display: none;
   }

@@ -26,12 +26,14 @@ const pageTitle = `文章列表 - ${SITE_TITLE}`;
   containerClass="max-w-7xl"
   className="!p-0"
 >
-  <main class="fixed bottom-0 left-0 right-0 top-7 flex items-center justify-center p-4 lg:p-6">
+  <main
+    class="fixed bottom-0 left-0 right-0 top-7 flex items-center justify-center p-4 lg:p-6"
+  >
     <article
       class="flex h-full w-full max-w-[210mm] flex-col bg-white shadow-2xl dark:bg-zinc-900"
     >
       <div class="flex h-full flex-col p-6">
-        <header class="flex-shrink-0 mb-6">
+        <header class="mb-6 flex-shrink-0">
           <h1 class="text-xl font-semibold">文章列表</h1>
           <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
             第 1 / {totalPages} 页 · 共 {sortedPosts.length} 篇文章
@@ -39,7 +41,9 @@ const pageTitle = `文章列表 - ${SITE_TITLE}`;
         </header>
 
         <!-- 文章列表区域 - 可滚动但隐藏滚动条 -->
-        <div class="flex-1 overflow-y-auto min-h-0 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+        <div
+          class="min-h-0 flex-1 overflow-y-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        >
           {
             posts.length === 0 ? (
               <p class="text-sm text-zinc-500">暂无文章</p>
@@ -66,27 +70,41 @@ const pageTitle = `文章列表 - ${SITE_TITLE}`;
         </div>
 
         <!-- 分页控件 -->
-        <div class="flex-shrink-0 mt-6 flex items-center justify-between border-t border-zinc-200 pt-4 dark:border-zinc-700">
+        <div
+          class="mt-6 flex flex-shrink-0 items-center justify-between border-t border-zinc-200 pt-4 dark:border-zinc-700"
+        >
           <div>
             <!-- 第一页没有上一页 -->
           </div>
-          
+
           <span class="text-sm text-zinc-400">
-              1 / {totalPages}
+            1 / {totalPages}
           </span>
 
           <div>
-          {
+            {
               hasNextPage ? (
-              <a
+                <a
                   href="/posts/2"
                   class="flex items-center gap-1 text-sm text-zinc-600 hover:text-blue-600 dark:text-zinc-400 dark:hover:text-blue-400"
-              >
+                >
                   下一页
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-              </a>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </a>
               ) : null
-          }
+            }
           </div>
         </div>
       </div>
