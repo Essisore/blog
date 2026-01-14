@@ -293,12 +293,25 @@ LIMIT 10
 
 #### 优化器
 
-我的理解（可能不正确）：现在是将向量索引当作普通的索引参与代价模型的评估，选出最优的执行计划。
+优化器在什么情况下会选择向量索引呢？
 
-如上面的 select 语句，如果去掉了 limit 子句，就不会选用向量索引。
+简要回答：order by 需搭配 limit 子句，且 order by 子句中使用 vec_distance 函数，且走向量索引的代价最低。
 
-这是因为在 `test_if_cheaper_ordering` 函数中，会遍历所有的 order 子句能够使用的索引，并比较使用索引和 file sort 的代价，如果使用索引的代价更低，则会使用索引。
-这个过程中要求索引是聚簇索引，或者有 limit 子句。而计算代价（`cost_for_index_read`）流程并没针对 hlindex 做什么特殊处理。
+在 `find_indexes_matching_order` 函数中会调用 order by 表达式的 `part_of_sortkey` 函数，这个函数会返回 order by 能够使用哪些索引，而 `VEC_DISTANCE_*` 函数只会返回向量索引（对应 `Item_func_vec_distance::part_of_sortkey` 实现）。`part_of_sortkey` 返回的索引会被作为 `usable_keys` 继续参与后续评估。
+
+后续在 `test_if_cheaper_ordering` 函数中还会对索引进行诸多检查：
+1. `test_if_order_by_key`，检查索引是否满足 order by 的排序要求
+2. 索引需满足以下条件之一
+    - 覆盖索引（`is_covering`)
+    - 有 limit 子句（`has_limit`)
+    - 优化器强制要求使用索引合并策略（`force_index_merge`）
+    - 特定场景（`ref_key < 0 && (group || table->force_index)`）
+3. 计算代价（`get_range_limit_read_cost`），选出 cost 最低的执行路径（P.S. 也会与 file sort 比较代价）
+
+mariadb **似乎**并没有对向量索引的代价计算做特殊的处理。
+
+总结一下：选择向量索引的必要条件是对向量列按距离 topk 排序，但实际上不一定会使用向量索引，需要结合 optimizer_trace 进行分析。
+对于上面示例中的 select 语句，如果去掉了 limit 子句，就不会选用向量索引。
 
 #### 查询流程
 
