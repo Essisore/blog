@@ -160,7 +160,7 @@
     }
 
     a {
-      @apply text-blue-500 underline decoration-blue-300 underline-offset-2 transition-colors hover:text-blue-600 hover:decoration-blue-500 dark:decoration-blue-700 dark:hover:decoration-blue-400;
+      @apply text-blue-500 no-underline transition-colors hover:text-blue-600;
     }
     a[href^="http"]::after,
     a[href^="https://"]::after
