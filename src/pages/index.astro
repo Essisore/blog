@@ -1,5 +1,5 @@
 ---
-import { SITE_DESCRIPTION, SITE_TITLE } from "../consts";
+import { AUTHOR, SITE_DESCRIPTION, SITE_TITLE } from "../consts";
 import Layout from "../layouts/Layout.astro";
 ---
 
@@ -13,7 +13,14 @@ import Layout from "../layouts/Layout.astro";
       <p>
         你好，我是
         longfei。欢迎来到我的博客。这个博客主要用来记录一些技术笔记（很硬核
-        XD），包括源码分析，论文阅读等。欢迎通过邮件与我交流。
+        XD），包括源码分析，论文阅读等。欢迎通过
+        <a
+          href={`mailto:${AUTHOR.email}`}
+          class="text-blue-500 underline hover:text-blue-600"
+        >
+          邮件
+        </a>
+        与我交流。
       </p>
     </section>
 
