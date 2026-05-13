@@ -160,6 +160,7 @@
         resetZoom(); // Reset zoom state when opening
         viewer.classList.remove("hidden");
         viewer.setAttribute("aria-hidden", "false");
+        document.documentElement.classList.add("image-viewer-open");
         // 使用 setTimeout 确保过渡动画生效
         setTimeout(() => {
           viewer.classList.add("show");
@@ -187,6 +188,7 @@
       viewer.setAttribute("aria-hidden", "true");
       setTimeout(() => {
         viewer.classList.add("hidden");
+        document.documentElement.classList.remove("image-viewer-open");
         document.body.style.overflow = "";
         viewerImage.src = "";
         resetZoom(); // Reset zoom state when closing
@@ -248,3 +250,10 @@
   // Astro 页面切换后重新初始化
   document.addEventListener("astro:after-swap", setupImageViewer);
 </script>
+
+<style is:global>
+  html.image-viewer-open #zen-toggle,
+  html.image-viewer-open #back-to-top {
+    display: none;
+  }
+</style>

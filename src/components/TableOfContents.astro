@@ -20,8 +20,7 @@ const items = headings.filter(
 {
   items.length > 0 && (
     <nav
-      class="sticky top-1/2 hidden w-56 flex-shrink-0 self-start lg:block"
-      style="transform: translateY(-50%);"
+      class="sticky top-1/2 hidden max-h-[calc(100vh-4rem)] w-56 flex-shrink-0 -translate-y-1/2 self-start overflow-y-auto lg:block"
       aria-label="目录导航"
     >
       <div class="rounded-lg bg-white/50 p-3 backdrop-blur-sm dark:bg-zinc-900/50">
@@ -76,7 +75,7 @@ const items = headings.filter(
 
 <script>
   function initTableOfContents() {
-    const tocLinks = document.querySelectorAll("[data-toc-link]");
+    const tocLinks = Array.from(document.querySelectorAll("[data-toc-link]"));
     if (tocLinks.length === 0) return;
 
     const headings = Array.from(
@@ -87,23 +86,7 @@ const items = headings.filter(
     if (headings.length === 0) return;
 
     let activeId: string | null = null;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            activeId = entry.target.id;
-            updateActiveLink();
-          }
-        });
-      },
-      {
-        rootMargin: "-100px 0px -66%",
-        threshold: 0,
-      },
-    );
-
-    headings.forEach((heading) => observer.observe(heading));
+    let ticking = false;
 
     function updateActiveLink() {
       tocLinks.forEach((link) => {
@@ -134,8 +117,39 @@ const items = headings.filter(
       });
     }
 
-    // 初始高亮
-    updateActiveLink();
+    function updateActiveHeading() {
+      const anchorOffset = 120;
+      let current = headings[0];
+
+      for (const heading of headings) {
+        const top = heading.getBoundingClientRect().top;
+        if (top <= anchorOffset) {
+          current = heading;
+        } else {
+          break;
+        }
+      }
+
+      const nextActiveId = current?.id ?? null;
+      if (nextActiveId !== activeId) {
+        activeId = nextActiveId;
+        updateActiveLink();
+      }
+    }
+
+    function onScroll() {
+      if (ticking) return;
+
+      window.requestAnimationFrame(() => {
+        updateActiveHeading();
+        ticking = false;
+      });
+      ticking = true;
+    }
+
+    updateActiveHeading();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
   }
 
   // 初始化

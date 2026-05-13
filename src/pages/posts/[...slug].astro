@@ -54,25 +54,29 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
   article={true}
 >
   <main
+    id="post-main"
     class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-center lg:gap-8"
   >
-    <TableOfContents headings={headings} />
+    <div id="post-toc" class="contents">
+      <TableOfContents headings={headings} />
+    </div>
     <article
-      class="w-full max-w-[210mm] flex-shrink-0 bg-white shadow-2xl dark:bg-zinc-900 lg:my-6"
+      id="post-article"
+      class="w-full max-w-[820px] flex-shrink-0 lg:my-10"
       itemscope
       itemtype="https://schema.org/BlogPosting"
     >
-      <div class="p-6">
-        <header class="border-b border-zinc-200 pb-4 dark:border-zinc-700">
+      <div class="px-4 py-8 sm:px-6 lg:px-0">
+        <header class="border-b border-zinc-100 pb-4 dark:border-zinc-800">
           <h1
-            class="mb-2 text-xl font-semibold"
+            class="mb-3 text-xl font-semibold"
             itemprop="headline"
             transition:name={`title-${post.slug}`}
           >
             {post.data.title}
           </h1>
           <div
-            class="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-xs text-zinc-600 dark:text-zinc-400"
+            class="flex flex-wrap items-center gap-x-2 gap-y-1 font-mono text-xs text-zinc-500 dark:text-zinc-500"
           >
             <time
               datetime={post.data.date.toISOString()}
@@ -91,30 +95,31 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
                 </span>
               )
             }
-          </div>
-          {
-            post.data.tags && post.data.tags.length > 0 && (
-              <div class="mt-3 flex flex-wrap gap-2">
-                {post.data.tags.map((tag) => (
+            {
+              post.data.tags &&
+                post.data.tags.length > 0 &&
+                post.data.tags.map((tag) => (
                   <a
                     href={`/tags/${tag}`}
-                    class="rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:hover:bg-blue-900/50"
+                    class="text-zinc-500 transition-colors hover:text-blue-600 dark:text-zinc-500 dark:hover:text-blue-400"
                   >
-                    #{tag}
+                    · #{tag}
                   </a>
-                ))}
-              </div>
-            )
-          }
+                ))
+            }
+          </div>
         </header>
 
         <div class="prose-custom mt-6" itemprop="articleBody">
           <Content components={{ table: PostTable }} />
         </div>
 
-        <hr class="my-8 border-zinc-200 dark:border-zinc-800" />
+        <hr class="my-8 border-zinc-100 dark:border-zinc-800" />
 
-        <nav class="flex flex-col justify-between gap-6 sm:flex-row">
+        <nav
+          id="post-nav"
+          class="flex flex-col justify-between gap-6 text-sm sm:flex-row"
+        >
           {
             prevPost ? (
               <a
@@ -180,8 +185,134 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
       </div>
     </article>
   </main>
+  <button
+    id="zen-toggle"
+    type="button"
+    title="Zen mode (Z)"
+    class="fixed bottom-20 right-6 z-50 inline-flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white/90 font-mono text-sm font-medium text-zinc-600 shadow-sm backdrop-blur transition-colors hover:border-zinc-300 hover:text-zinc-950 aria-pressed:border-blue-500 aria-pressed:bg-blue-50 aria-pressed:text-blue-600 dark:border-zinc-700 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-zinc-50 dark:aria-pressed:border-blue-400 dark:aria-pressed:bg-blue-950/40 dark:aria-pressed:text-blue-300"
+    aria-label="切换 Zen 阅读模式"
+    aria-pressed="false"
+  >
+    Z
+  </button>
   <CodeCopyButton />
   <ImageViewer />
   <ScrollProgress />
   <HeadingLinks />
 </Layout>
+
+<style is:global>
+  html.post-zen #post-toc {
+    display: none;
+  }
+
+  html.post-zen #post-article {
+    max-width: min(100%, 72rem);
+  }
+
+  html.post-zen #post-article > div {
+    padding-inline: clamp(1.5rem, 4vw, 4rem);
+  }
+
+  html.post-zen #post-article .prose-custom img {
+    max-height: 720px;
+  }
+
+  html.post-zen #post-article .prose-custom pre:has(code) {
+    padding: 1rem;
+    font-size: 0.8rem;
+  }
+
+  html.post-zen #post-article .prose-custom table {
+    font-size: 0.8rem;
+  }
+
+  html.post-zen #post-article .prose-custom th,
+  html.post-zen #post-article .prose-custom td {
+    padding: 0.75rem;
+  }
+
+  html.post-zen #post-main {
+    justify-content: center;
+  }
+
+  html.post-zen #site-header,
+  html.post-zen #site-header-spacer {
+    display: none;
+  }
+
+  html.post-zen #zen-toggle,
+  html.post-zen #scroll-progress,
+  html.post-zen #back-to-top,
+  html.post-zen #post-nav,
+  html.post-zen .copy-button,
+  html.post-zen .language-tag {
+    display: none;
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = "post-zen-mode";
+
+  function setZenMode(enabled: boolean) {
+    document.documentElement.classList.toggle("post-zen", enabled);
+
+    const button = document.getElementById("zen-toggle");
+    if (button) {
+      button.setAttribute("aria-pressed", String(enabled));
+    }
+
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, enabled ? "true" : "false");
+    }
+  }
+
+  function initZenToggle() {
+    const button = document.getElementById("zen-toggle");
+    if (!button) return;
+
+    const saved =
+      typeof localStorage !== "undefined"
+        ? localStorage.getItem(STORAGE_KEY) === "true"
+        : false;
+
+    setZenMode(saved);
+
+    button.onclick = () => {
+      setZenMode(!document.documentElement.classList.contains("post-zen"));
+    };
+  }
+
+  function initZenShortcut() {
+    document.onkeydown = (event) => {
+      if (event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.closest(
+          'input, textarea, select, button, [contenteditable="true"]',
+        )
+      ) {
+        return;
+      }
+
+      if (event.key.toLowerCase() === "z") {
+        setZenMode(!document.documentElement.classList.contains("post-zen"));
+      }
+
+      if (
+        event.key === "Escape" &&
+        document.documentElement.classList.contains("post-zen")
+      ) {
+        setZenMode(false);
+      }
+    };
+  }
+
+  initZenToggle();
+  initZenShortcut();
+  document.addEventListener("astro:after-swap", initZenToggle);
+  document.addEventListener("astro:after-swap", initZenShortcut);
+</script>

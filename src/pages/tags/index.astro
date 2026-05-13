@@ -17,6 +17,15 @@ const tagCounts = tags.reduce(
 );
 
 const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+const maxCount = Math.max(...sortedTags.map(([, count]) => count), 1);
+
+function getTagClass(count: number) {
+  const ratio = count / maxCount;
+
+  if (ratio >= 0.8) return "text-lg font-semibold";
+  if (ratio >= 0.5) return "text-base font-medium";
+  return "text-sm font-medium";
+}
 
 const pageTitle = `标签墙 - ${SITE_TITLE}`;
 ---
@@ -24,51 +33,38 @@ const pageTitle = `标签墙 - ${SITE_TITLE}`;
 <Layout
   title={pageTitle}
   description={SITE_DESCRIPTION}
-  containerClass="max-w-7xl"
-  className="!p-0"
+  containerClass="max-w-3xl"
+  className="py-10"
 >
-  <main class="flex justify-center lg:my-6">
-    <article
-      class="w-full max-w-[210mm] bg-white shadow-2xl dark:bg-zinc-900"
-      style="min-height: 297mm;"
-    >
-      <div class="h-full overflow-auto p-6">
-        <header class="mb-6 border-b border-zinc-200 pb-4 dark:border-zinc-700">
-          <h1 class="text-xl font-semibold">标签墙</h1>
-          <p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-            共 {sortedTags.length} 个标签
-          </p>
-        </header>
+  <main class="space-y-8">
+    <header class="border-b border-zinc-200 pb-4 dark:border-zinc-800">
+      <h1 class="text-xl font-semibold text-zinc-950 dark:text-zinc-50">
+        标签墙
+      </h1>
+      <p class="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+        共 {sortedTags.length} 个标签
+      </p>
+    </header>
 
-        {
-          sortedTags.length === 0 ? (
-            <p class="text-sm text-zinc-500">暂无标签</p>
-          ) : (
-            <div class="flex flex-wrap gap-2">
-              {sortedTags.map(([tag, count]) => (
-                <a
-                  href={`/tags/${tag}`}
-                  class="group flex items-center gap-1 rounded-full bg-zinc-100 px-2.5 py-1 text-sm transition-colors hover:bg-blue-100 dark:bg-zinc-800 dark:hover:bg-blue-900/30"
-                >
-                  <span class="font-medium text-zinc-700 group-hover:text-blue-700 dark:text-zinc-300 dark:group-hover:text-blue-300">
-                    #{tag}
-                  </span>
-                  <span class="rounded-full border border-transparent bg-zinc-200 px-1.5 py-0.5 text-[0.65rem] text-zinc-500 group-hover:bg-blue-200 group-hover:text-blue-700 dark:bg-zinc-700 dark:group-hover:bg-blue-800 dark:group-hover:text-blue-300">
-                    {count}
-                  </span>
-                </a>
-              ))}
-            </div>
-          )
-        }
-      </div>
-    </article>
+    {
+      sortedTags.length === 0 ? (
+        <p class="text-sm text-zinc-500 dark:text-zinc-400">暂无标签</p>
+      ) : (
+        <div class="flex flex-wrap items-baseline gap-x-4 gap-y-3 leading-8">
+          {sortedTags.map(([tag, count]) => (
+            <a
+              href={`/tags/${tag}`}
+              class={`group inline-flex items-baseline gap-1 text-zinc-700 no-underline transition-colors hover:text-blue-600 dark:text-zinc-300 dark:hover:text-blue-400 ${getTagClass(count)}`}
+              title={`${count} 篇文章`}
+            >
+              <span>#{tag}</span>
+              <span class="font-mono text-[0.65rem] font-normal text-zinc-400 transition-colors group-hover:text-blue-500 dark:text-zinc-500 dark:group-hover:text-blue-400">
+                {count}
+              </span>
+            </a>
+          ))}
+        </div>
+      )
+    }
   </main>
 </Layout>
-
-<style>
-  /* 覆盖全局 article a 的下划线样式 */
-  article a {
-    text-decoration: none;
-  }
-</style>

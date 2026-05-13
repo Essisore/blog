@@ -5,6 +5,7 @@ import ThemeToggle from "./ThemeToggle.astro";
 ---
 
 <header
+  id="site-header"
   class="fixed left-0 right-0 top-0 z-50 bg-white/80 backdrop-blur-sm transition-shadow dark:bg-zinc-900/80"
   transition:name="header"
   transition:animate="fade"
@@ -29,7 +30,7 @@ import ThemeToggle from "./ThemeToggle.astro";
 </header>
 
 <!-- 占位元素，防止内容被固定导航栏遮挡 -->
-<div class="h-7" aria-hidden="true"></div>
+<div id="site-header-spacer" class="h-7" aria-hidden="true"></div>
 
 <style>
   a {

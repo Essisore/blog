@@ -124,6 +124,8 @@
     letter-spacing: 0.05em;
     z-index: 1;
     border: 1px solid rgba(59, 130, 246, 0.3);
+    opacity: 0;
+    transition: opacity 0.2s ease;
   }
 
   :global(html.dark) .language-tag {
@@ -151,6 +153,14 @@
     transition: all 0.2s ease;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+  }
+
+  .code-block-wrapper:hover .language-tag,
+  .code-block-wrapper:focus-within .language-tag,
+  .code-block-wrapper:hover .copy-button,
+  .code-block-wrapper:focus-within .copy-button {
+    opacity: 1;
   }
 
   .copy-button:hover {

@@ -10,7 +10,7 @@ export const SITE_DESCRIPTION =
 
 export const AUTHOR = {
   name: "Longfei",
-  email: "essisore@gmail.com",
+  email: "leismo7@gmail.com",
 } as const;
 
 import defaultImage from "./assets/blog-placeholder.png";
