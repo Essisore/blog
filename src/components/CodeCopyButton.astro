@@ -9,7 +9,7 @@
 
     codeBlocks.forEach((pre) => {
       // 检查是否已经添加过按钮
-      if (pre.querySelector(".copy-button")) return;
+      if (pre.closest(".code-block-wrapper")) return;
 
       // 创建包装器
       const wrapper = document.createElement("div");

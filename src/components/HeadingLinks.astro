@@ -7,6 +7,9 @@
 
     headings.forEach((heading) => {
       const headingElement = heading as HTMLElement;
+      if (headingElement.dataset.headingLinkInitialized === "true") return;
+      headingElement.dataset.headingLinkInitialized = "true";
+
       headingElement.style.cursor = "pointer";
       headingElement.setAttribute("role", "button");
       headingElement.setAttribute("tabindex", "0");

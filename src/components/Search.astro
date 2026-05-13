@@ -94,6 +94,16 @@ const isDev = import.meta.env.DEV;
       document.addEventListener("keydown", this.handleKeydown);
     }
 
+    destroy() {
+      this.trigger?.removeEventListener("click", this.openModal);
+      this.overlay?.removeEventListener("click", this.handleOverlayClick);
+      document.removeEventListener("keydown", this.handleKeydown);
+      if (this.dialog?.open) {
+        this.dialog.close();
+        document.body.style.overflow = "";
+      }
+    }
+
     openModal() {
       if (!this.dialog) return;
       this.dialog.showModal();
@@ -154,15 +164,14 @@ const isDev = import.meta.env.DEV;
     }
   }
 
-  // 初始化
-  // 1. 立即初始化 (适配 MPA 和 首次加载)
-  new SearchController();
+  function initSearchController() {
+    window.searchController?.destroy();
+    window.searchController = new SearchController();
+  }
 
-  // 2. 适配 View Transitions 的后续导航
-  // astro:after-swap 会在页面内容替换后触发
-  document.addEventListener("astro:after-swap", () => {
-    new SearchController();
-  });
+  initSearchController();
+
+  document.addEventListener("astro:after-swap", initSearchController);
 </script>
 
 <style is:global>

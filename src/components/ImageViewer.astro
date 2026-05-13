@@ -112,6 +112,8 @@
 
 <script>
   function setupImageViewer() {
+    (window as any).__imageViewerCleanup?.();
+
     const viewer = document.getElementById("image-viewer");
     const viewerImage = document.getElementById(
       "viewer-image",
@@ -144,6 +146,8 @@
     // 为文章中的所有图片添加点击事件
     const articleImages = document.querySelectorAll("article img");
 
+    const cleanups: Array<() => void> = [];
+
     articleImages.forEach((img) => {
       const imageElement = img as HTMLImageElement;
       imageElement.style.cursor = "pointer";
@@ -174,11 +178,17 @@
       imageElement.addEventListener("click", openViewer);
 
       // 键盘可访问性
-      imageElement.addEventListener("keydown", (e) => {
+      const handleImageKeydown = (e: KeyboardEvent) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           openViewer();
         }
+      };
+      imageElement.addEventListener("keydown", handleImageKeydown);
+
+      cleanups.push(() => {
+        imageElement.removeEventListener("click", openViewer);
+        imageElement.removeEventListener("keydown", handleImageKeydown);
       });
     });
 
@@ -196,38 +206,43 @@
     };
 
     // Zoom handler
-    viewerImage.addEventListener("wheel", (e) => {
+    const handleWheel = (e: WheelEvent) => {
       if (!e.ctrlKey) return;
       e.preventDefault();
       const delta = -Math.sign(e.deltaY) * 0.1;
       const newScale = Math.min(Math.max(0.1, scale + delta), 5); // Limit zoom level
       scale = newScale;
       updateTransform();
-    });
+    };
+    viewerImage.addEventListener("wheel", handleWheel);
 
     // Pan (Drag) handlers
-    viewerImage.addEventListener("mousedown", (e) => {
+    const handleMousedown = (e: MouseEvent) => {
       e.preventDefault();
       isDragging = true;
       startX = e.clientX - translateX;
       startY = e.clientY - translateY;
       viewerImage.style.cursor = "grabbing";
-    });
+    };
+    viewerImage.addEventListener("mousedown", handleMousedown);
 
-    window.addEventListener("mousemove", (e) => {
+    const handleMousemove = (e: MouseEvent) => {
       if (!isDragging) return;
       e.preventDefault();
       translateX = e.clientX - startX;
       translateY = e.clientY - startY;
       updateTransform();
-    });
+    };
 
-    window.addEventListener("mouseup", () => {
+    const handleMouseup = () => {
       if (isDragging) {
         isDragging = false;
         viewerImage.style.cursor = "grab";
       }
-    });
+    };
+
+    window.addEventListener("mousemove", handleMousemove);
+    window.addEventListener("mouseup", handleMouseup);
 
     // 点击关闭按钮
     closeButton?.addEventListener("click", closeViewer);
@@ -242,6 +257,18 @@
       }
     };
     document.addEventListener("keydown", handleKeydown);
+
+    (window as any).__imageViewerCleanup = () => {
+      cleanups.forEach((cleanup) => cleanup());
+      closeButton?.removeEventListener("click", closeViewer);
+      backdrop?.removeEventListener("click", closeViewer);
+      viewerImage.removeEventListener("wheel", handleWheel);
+      viewerImage.removeEventListener("mousedown", handleMousedown);
+      window.removeEventListener("mousemove", handleMousemove);
+      window.removeEventListener("mouseup", handleMouseup);
+      document.removeEventListener("keydown", handleKeydown);
+      document.documentElement.classList.remove("image-viewer-open");
+    };
   }
 
   // 初始化

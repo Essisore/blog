@@ -33,6 +33,8 @@
 
 <script>
   function initScrollFeatures() {
+    (window as any).__scrollFeaturesCleanup?.();
+
     const progressBar = document.getElementById("scroll-progress");
     const backToTopButton = document.getElementById("back-to-top");
 
@@ -86,16 +88,23 @@
     window.addEventListener("scroll", onScroll, { passive: true });
 
     // 返回顶部点击事件
-    backToTopButton.addEventListener("click", () => {
+    const scrollToTop = () => {
       window.scrollTo({
         top: 0,
         behavior: "smooth",
       });
-    });
+    };
+
+    backToTopButton.addEventListener("click", scrollToTop);
 
     // 初始化
     updateProgress();
     toggleBackToTop();
+
+    (window as any).__scrollFeaturesCleanup = () => {
+      window.removeEventListener("scroll", onScroll);
+      backToTopButton.removeEventListener("click", scrollToTop);
+    };
   }
 
   // 初始化

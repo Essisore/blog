@@ -75,6 +75,8 @@ const items = headings.filter(
 
 <script>
   function initTableOfContents() {
+    (window as any).__tocCleanup?.();
+
     const tocLinks = Array.from(document.querySelectorAll("[data-toc-link]"));
     if (tocLinks.length === 0) return;
 
@@ -150,6 +152,11 @@ const items = headings.filter(
     updateActiveHeading();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+
+    (window as any).__tocCleanup = () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
   }
 
   // 初始化

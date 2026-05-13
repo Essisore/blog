@@ -1,18 +1,11 @@
 ---
-import { getCollection } from "astro:content";
-import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
+import PostList from "../../components/PostList.astro";
+import { SITE_CONFIG, SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 import Layout from "../../layouts/Layout.astro";
-import { formatDate } from "../../lib/utils";
+import { getPublishedPosts } from "../../lib/posts";
 
-const allPosts = await getCollection("posts");
-
-// 过滤草稿并按日期排序
-const sortedPosts = allPosts
-  .filter((post) => !post.data.draft)
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
-
-// 分页配置
-const pageSize = 20;
+const sortedPosts = await getPublishedPosts();
+const pageSize = SITE_CONFIG.postsPerPage;
 const posts = sortedPosts.slice(0, pageSize);
 const totalPages = Math.ceil(sortedPosts.length / pageSize);
 const hasNextPage = totalPages > 1;
@@ -38,32 +31,7 @@ const pageTitle = `文章列表 - ${SITE_TITLE}`;
       </p>
     </header>
 
-    {
-      posts.length === 0 ? (
-        <p class="text-sm text-zinc-500 dark:text-zinc-400">暂无文章</p>
-      ) : (
-        <ul class="m-0 flex list-none flex-col p-0 text-sm" role="list">
-          {posts.map((post) => (
-            <li class="m-0 list-none p-0">
-              <a
-                href={`/posts/${post.slug}`}
-                class="group grid gap-1 py-3 no-underline transition-colors sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-6"
-              >
-                <span class="font-medium leading-snug text-zinc-900 transition-colors group-hover:text-blue-600 dark:text-zinc-100 dark:group-hover:text-blue-400">
-                  {post.data.title}
-                </span>
-                <time
-                  datetime={post.data.date.toISOString()}
-                  class="font-mono text-xs text-zinc-500 dark:text-zinc-500"
-                >
-                  {formatDate(post.data.date)}
-                </time>
-              </a>
-            </li>
-          ))}
-        </ul>
-      )
-    }
+    <PostList posts={posts} />
 
     <nav
       class="flex items-center justify-between border-t border-zinc-200 pt-4 text-sm dark:border-zinc-800"

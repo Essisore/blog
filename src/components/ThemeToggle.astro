@@ -33,6 +33,8 @@
   function setListener() {
     const button = document.getElementById("theme-toggle");
     if (!button) return;
+    if (button.dataset.themeToggleInitialized === "true") return;
+    button.dataset.themeToggleInitialized = "true";
 
     const handleClick = () => {
       const isDark = document.documentElement.classList.toggle("dark");

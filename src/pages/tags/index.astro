@@ -1,21 +1,9 @@
 ---
-import { getCollection } from "astro:content";
 import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 import Layout from "../../layouts/Layout.astro";
+import { getTagCounts } from "../../lib/posts";
 
-const allPosts = await getCollection("posts");
-const tags = allPosts
-  .filter((post) => !post.data.draft)
-  .flatMap((post) => post.data.tags || []);
-
-const tagCounts = tags.reduce(
-  (acc, tag) => {
-    acc[tag] = (acc[tag] || 0) + 1;
-    return acc;
-  },
-  {} as Record<string, number>,
-);
-
+const tagCounts = await getTagCounts();
 const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
 const maxCount = Math.max(...sortedTags.map(([, count]) => count), 1);
 

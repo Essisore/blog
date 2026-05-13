@@ -7,7 +7,18 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Exo 2", "Noto Sans SC", ...defaultTheme.fontFamily.sans],
+        sans: [
+          "system-ui",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "PingFang SC",
+          "Hiragino Sans GB",
+          "Microsoft YaHei",
+          "Noto Sans CJK SC",
+          "Noto Sans SC",
+          ...defaultTheme.fontFamily.sans,
+        ],
         mono: ["Geist Mono", ...defaultTheme.fontFamily.mono],
       },
       typography: {

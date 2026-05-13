@@ -1,17 +1,15 @@
 ---
 import type { GetStaticPaths, Page } from "astro";
-import { type CollectionEntry, getCollection } from "astro:content";
-import { SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
+import type { CollectionEntry } from "astro:content";
+import { SITE_CONFIG, SITE_DESCRIPTION, SITE_TITLE } from "../../consts";
 import Layout from "../../layouts/Layout.astro";
+import { getPublishedPosts } from "../../lib/posts";
 import { formatDate } from "../../lib/utils";
 
 export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
-  const allPosts = await getCollection("posts");
-  const posts = allPosts
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const posts = await getPublishedPosts();
 
-  return paginate(posts, { pageSize: 20 });
+  return paginate(posts, { pageSize: SITE_CONFIG.postsPerPage });
 };
 
 type Props = {

@@ -1,5 +1,5 @@
 ---
-import { type CollectionEntry, getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
 import CodeCopyButton from "../../components/CodeCopyButton.astro";
 import HeadingLinks from "../../components/HeadingLinks.astro";
 import ImageViewer from "../../components/ImageViewer.astro";
@@ -8,14 +8,11 @@ import ScrollProgress from "../../components/ScrollProgress.astro";
 import TableOfContents from "../../components/TableOfContents.astro";
 import { SITE_TITLE } from "../../consts";
 import Layout from "../../layouts/Layout.astro";
+import { getPublishedPosts } from "../../lib/posts";
 import { formatDate } from "../../lib/utils";
 
 export async function getStaticPaths() {
-  const posts = await getCollection("posts");
-  // 过滤草稿并按日期降序排序（最新的在前）
-  const publishedPosts = posts
-    .filter((post) => !post.data.draft)
-    .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  const publishedPosts = await getPublishedPosts();
 
   return publishedPosts.map((post, index) => ({
     params: { slug: post.slug },
