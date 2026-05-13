@@ -64,8 +64,22 @@ Add new blog posts as Markdown or MDX files in the `src/content/posts/` director
 title: "Lorem Ipsum"
 description: "Lorem ipsum dolor sit amet."
 date: "Nov 06 2024"
+tags: ["Astro", "Notes"]
 ---
 ```
+
+To keep a post out of the published site, add `draft: true` to its frontmatter:
+
+```yml
+---
+title: "Work in Progress"
+description: "Draft notes."
+date: "Nov 06 2024"
+draft: true
+---
+```
+
+Draft posts are excluded from article lists, tag pages, RSS, generated post pages, and the production search index.
 
 ### Markdown Styling
 

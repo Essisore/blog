@@ -1,10 +1,15 @@
 import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+
+export function isPublishedPost(post: CollectionEntry<"posts">) {
+  return !post.data.draft;
+}
 
 export async function getPublishedPosts() {
   const posts = await getCollection("posts");
 
   return posts
-    .filter((post) => !post.data.draft)
+    .filter(isPublishedPost)
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 }
 
