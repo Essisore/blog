@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { posts, emptyText = "暂无文章", compact = false } = Astro.props;
-const itemPadding = compact ? "py-2" : "py-3";
+const itemPadding = compact ? "py-1.5" : "py-2";
 ---
 
 {
@@ -21,7 +21,7 @@ const itemPadding = compact ? "py-2" : "py-3";
         <li class="m-0 list-none p-0">
           <a
             href={`/posts/${post.slug}`}
-            class={`group grid gap-1 ${itemPadding} no-underline transition-colors sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-6`}
+            class={`group grid gap-0.5 ${itemPadding} no-underline transition-colors sm:grid-cols-[1fr_auto] sm:items-baseline sm:gap-5`}
           >
             <span class="font-medium leading-snug text-zinc-900 transition-colors group-hover:text-blue-600 dark:text-zinc-100 dark:group-hover:text-blue-400">
               {post.data.title}
