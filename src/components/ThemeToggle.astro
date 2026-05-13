@@ -30,22 +30,55 @@
 </button>
 
 <script>
+  function toggleTheme() {
+    const isDark = document.documentElement.classList.toggle("dark");
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem("theme", isDark ? "dark" : "light");
+    }
+  }
+
   function setListener() {
     const button = document.getElementById("theme-toggle");
     if (!button) return;
     if (button.dataset.themeToggleInitialized === "true") return;
     button.dataset.themeToggleInitialized = "true";
 
-    const handleClick = () => {
-      const isDark = document.documentElement.classList.toggle("dark");
-      if (typeof localStorage !== "undefined") {
-        localStorage.setItem("theme", isDark ? "dark" : "light");
-      }
+    button.addEventListener("click", toggleTheme);
+  }
+
+  function setShortcutListener() {
+    const appWindow = window as Window & {
+      __themeShortcutInitialized?: boolean;
     };
 
-    button.addEventListener("click", handleClick);
+    if (appWindow.__themeShortcutInitialized) return;
+    appWindow.__themeShortcutInitialized = true;
+
+    document.addEventListener("keydown", (event) => {
+      if (
+        event.key.toLowerCase() !== "t" ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.closest(
+          'input, textarea, select, button, [contenteditable="true"]',
+        )
+      ) {
+        return;
+      }
+
+      toggleTheme();
+    });
   }
 
   setListener();
+  setShortcutListener();
   document.addEventListener("astro:after-swap", setListener);
+  document.addEventListener("astro:after-swap", setShortcutListener);
 </script>
