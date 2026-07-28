@@ -1,6 +1,3 @@
-@import "@fontsource/geist-mono/400.css";
-@import "@fontsource/geist-mono/500.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -55,6 +52,15 @@
 
 @layer components {
   /* 文章样式 */
+  .prose-custom {
+    font-family: "Noto Serif CJK SC", "Source Han Serif SC", "Songti SC",
+      STSong, ui-serif, Georgia, Cambria, "Times New Roman", serif;
+    font-size: 1rem;
+    line-height: 1.875;
+    letter-spacing: 0.01em;
+    text-wrap: pretty;
+  }
+
   article,
   .prose-custom {
     @apply text-zinc-900 dark:text-zinc-200;
@@ -127,7 +133,10 @@
     }
 
     :not(pre) > code {
-      @apply whitespace-nowrap rounded border bg-zinc-200/50 px-1 py-0.5 font-mono text-xs font-medium text-black dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-white;
+      @apply rounded-sm bg-zinc-100 px-1 py-px font-mono text-[0.875em] font-normal text-zinc-700 dark:bg-zinc-800/70 dark:text-zinc-200;
+      overflow-wrap: anywhere;
+      box-decoration-break: clone;
+      -webkit-box-decoration-break: clone;
     }
 
     pre:has(code) {
@@ -232,6 +241,42 @@
 
     mark {
       @apply bg-yellow-200 dark:bg-yellow-500/50 dark:text-white;
+    }
+  }
+
+  .prose-custom {
+    p {
+      @apply my-4 text-base;
+      line-height: 1.875;
+    }
+
+    ol,
+    ul {
+      @apply my-4 space-y-1 text-base;
+      line-height: 1.75;
+    }
+
+    blockquote {
+      @apply my-4 text-base;
+      line-height: 1.75;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        "PingFang SC",
+        "Hiragino Sans GB",
+        "Microsoft YaHei",
+        sans-serif;
+      letter-spacing: normal;
     }
   }
 }

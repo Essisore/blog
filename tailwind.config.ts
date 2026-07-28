@@ -19,7 +19,6 @@ const config: Config = {
           "Noto Sans SC",
           ...defaultTheme.fontFamily.sans,
         ],
-        mono: ["Geist Mono", ...defaultTheme.fontFamily.mono],
       },
       typography: {
         DEFAULT: {
