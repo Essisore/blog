@@ -59,6 +59,18 @@ export const EMAIL = "hello@nicholasly.com";
 
 Add new blog posts as Markdown or MDX files in the `src/content/posts/` directory. Use the following frontmatter structure:
 
+You can also create a draft interactively:
+
+```bash
+npm run new
+```
+
+Or provide the fields directly:
+
+```bash
+npm run new -- "My post title" --slug my-post --description "A short summary" --tags "Astro,JavaScript"
+```
+
 ```yml
 ---
 title: "Lorem Ipsum"

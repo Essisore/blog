@@ -8,6 +8,7 @@
     "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
     "astro": "astro",
+    "new": "node scripts/new-post.mjs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "astro check"
