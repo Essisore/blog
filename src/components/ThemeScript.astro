@@ -12,6 +12,9 @@
   const setTheme = (theme) => {
     const isDark = theme === "dark";
     document.documentElement.classList.toggle("dark", isDark);
+    document
+      .querySelector("#theme-color")
+      ?.setAttribute("content", isDark ? "#242421" : "#f3f1ea");
     if (typeof localStorage !== "undefined") {
       localStorage.setItem("theme", theme);
     }

@@ -59,14 +59,14 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
     </div>
     <article
       id="post-article"
-      class="w-full max-w-[820px] flex-shrink-0 lg:my-10"
+      class="w-full max-w-[760px] flex-shrink-0 lg:my-10"
       itemscope
       itemtype="https://schema.org/BlogPosting"
     >
       <div class="px-4 py-8 sm:px-6 lg:px-0">
-        <header class="border-b border-zinc-100 pb-4 dark:border-zinc-800">
+        <header class="border-b border-[var(--color-border)] pb-5">
           <h1
-            class="mb-3 text-xl font-semibold"
+            class="mb-3 text-3xl font-semibold leading-tight"
             itemprop="headline"
             transition:name={`title-${post.slug}`}
           >
@@ -111,7 +111,7 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
           <Content components={{ table: PostTable }} />
         </div>
 
-        <hr class="my-8 border-zinc-100 dark:border-zinc-800" />
+        <hr class="my-8 border-[var(--color-border)]" />
 
         <nav
           id="post-nav"
@@ -186,7 +186,7 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
     id="zen-toggle"
     type="button"
     title="Zen mode (Z)"
-    class="fixed bottom-20 right-6 z-50 inline-flex h-10 w-10 items-center justify-center rounded-md border border-zinc-200 bg-white/90 font-mono text-sm font-medium text-zinc-600 shadow-sm backdrop-blur transition-colors hover:border-zinc-300 hover:text-zinc-950 aria-pressed:border-blue-500 aria-pressed:bg-blue-50 aria-pressed:text-blue-600 dark:border-zinc-700 dark:bg-zinc-900/90 dark:text-zinc-300 dark:hover:border-zinc-600 dark:hover:text-zinc-50 dark:aria-pressed:border-blue-400 dark:aria-pressed:bg-blue-950/40 dark:aria-pressed:text-blue-300"
+    class="bg-[color:var(--color-surface)]/90 fixed bottom-20 right-6 z-50 inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--color-border)] font-mono text-sm font-medium text-zinc-600 shadow-sm backdrop-blur transition-colors hover:text-zinc-900 aria-pressed:border-blue-500 aria-pressed:bg-blue-50 aria-pressed:text-blue-600 dark:text-zinc-300 dark:hover:text-zinc-100 dark:aria-pressed:border-blue-400 dark:aria-pressed:bg-blue-950/40 dark:aria-pressed:text-blue-300"
     aria-label="切换 Zen 阅读模式"
     aria-pressed="false"
   >
