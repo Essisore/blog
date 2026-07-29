@@ -30,7 +30,7 @@
         <line x1="6" y1="6" x2="18" y2="18"></line>
       </svg>
     </button>
-    <img id="viewer-image" src="" alt="" loading="lazy" />
+    <img id="viewer-image" src="" alt="" />
   </div>
 </div>
 
@@ -159,7 +159,7 @@
       );
 
       const openViewer = () => {
-        viewerImage.src = imageElement.src;
+        viewerImage.src = imageElement.currentSrc || imageElement.src;
         viewerImage.alt = imageElement.alt;
         resetZoom(); // Reset zoom state when opening
         viewer.classList.remove("hidden");

@@ -143,6 +143,21 @@
         0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
+    picture:has(> source[media]) {
+      @apply my-4 block overflow-x-auto rounded-lg border bg-white p-3 dark:border-zinc-700 dark:bg-zinc-900;
+    }
+
+    picture:has(> source[media]) img {
+      @apply m-0 max-w-none border-0;
+      min-width: min(100%, max-content);
+      max-height: none;
+    }
+
+    picture:has(> source[media]) img:hover {
+      transform: none;
+      box-shadow: none;
+    }
+
     video {
       @apply my-2 rounded-lg border dark:border-zinc-700;
     }

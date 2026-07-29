@@ -20,8 +20,22 @@
     }
   };
 
+  const syncMermaidTheme = () => {
+    document
+      .querySelectorAll(
+        '.prose-custom picture source[media="(prefers-color-scheme: dark)"], .prose-custom picture source[data-mermaid-theme-source]',
+      )
+      .forEach((source) => {
+        source.dataset.mermaidThemeSource = "";
+        source.media = document.documentElement.classList.contains("dark")
+          ? "all"
+          : "not all";
+      });
+  };
+
   const initTheme = () => {
     setTheme(getTheme());
+    syncMermaidTheme();
 
     if (window.__themeListenerInitialized) return;
     window.__themeListenerInitialized = true;
@@ -34,8 +48,12 @@
     };
 
     mediaQuery.addEventListener("change", handleChange);
+    new MutationObserver(syncMermaidTheme).observe(document.documentElement, {
+      attributeFilter: ["class"],
+    });
   };
 
   initTheme();
+  document.addEventListener("DOMContentLoaded", syncMermaidTheme);
   document.addEventListener("astro:after-swap", initTheme);
 </script>

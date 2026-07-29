@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "new": "node scripts/new-post.mjs",
+    "mermaid:install": "playwright install chromium",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "astro check"
@@ -22,7 +23,9 @@
     "astro": "^5.1.0",
     "clsx": "^2.1.1",
     "katex": "^0.16.27",
+    "playwright": "^1.62.0",
     "rehype-katex": "^7.0.1",
+    "rehype-mermaid": "^3.0.0",
     "remark-math": "^6.0.0",
     "tailwind-merge": "^2.5.4",
     "tailwindcss": "^3.4.14",
