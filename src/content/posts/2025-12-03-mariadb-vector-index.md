@@ -300,12 +300,13 @@ LIMIT 10
 在 `find_indexes_matching_order` 函数中会调用 order by 表达式的 `part_of_sortkey` 函数，这个函数会返回 order by 能够使用哪些索引，而 `VEC_DISTANCE_*` 函数只会返回向量索引（对应 `Item_func_vec_distance::part_of_sortkey` 实现）。`part_of_sortkey` 返回的索引会被作为 `usable_keys` 继续参与后续评估。
 
 后续在 `test_if_cheaper_ordering` 函数中还会对索引进行诸多检查：
+
 1. `test_if_order_by_key`，检查索引是否满足 order by 的排序要求
 2. 索引需满足以下条件之一
-    - 覆盖索引（`is_covering`)
-    - 有 limit 子句（`has_limit`)
-    - 优化器强制要求使用索引合并策略（`force_index_merge`）
-    - 特定场景（`ref_key < 0 && (group || table->force_index)`）
+   - 覆盖索引（`is_covering`)
+   - 有 limit 子句（`has_limit`)
+   - 优化器强制要求使用索引合并策略（`force_index_merge`）
+   - 特定场景（`ref_key < 0 && (group || table->force_index)`）
 3. 计算代价（`get_range_limit_read_cost`），选出 cost 最低的执行路径（P.S. 也会与 file sort 比较代价）
 
 mariadb **似乎**并没有对向量索引的代价计算做特殊的处理。

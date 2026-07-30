@@ -8,7 +8,6 @@ draft: false
 
 Milvus 的配置系统采用**分层 + 多源合并**的设计：多个「配置源(Source)」并存，由 `config.Manager` 按优先级仲裁出每个 key 的最终生效值，并支持动态刷新。
 
-
 ## 整体架构
 
 ```mermaid
@@ -28,13 +27,12 @@ flowchart TD
 
 ## 四种源的优先级
 
-
-| 源 | priority | 可热刷新 | 典型来源 |
-|---|---|---|---|
-| overlay | 最高 | 是（运行时 `SetConfig`） | 单测 / 运行时热改 |
-| Etcd | 1 (High) | 是（watch） | 集群下发 |
-| Env | 11 (Normal) | 否 | 容器环境变量 |
-| File | 21 (Low) | 是（5s 轮询） | yaml 文件 |
+| 源      | priority    | 可热刷新                 | 典型来源          |
+| ------- | ----------- | ------------------------ | ----------------- |
+| overlay | 最高        | 是（运行时 `SetConfig`） | 单测 / 运行时热改 |
+| Etcd    | 1 (High)    | 是（watch）              | 集群下发          |
+| Env     | 11 (Normal) | 否                       | 容器环境变量      |
+| File    | 21 (Low)    | 是（5s 轮询）            | yaml 文件         |
 
 最终生效优先级（高→低）：**overlay > Etcd > Env > File**。
 
@@ -74,7 +72,6 @@ flowchart TD
     ETCDS --> ADD
 ```
 
-
 ## 配置目录与文件选择
 
 **目录定位** `initConfPath()`
@@ -84,7 +81,6 @@ flowchart TD
 1. `MILVUSCONF` 环境变量
 2. `<当前工作目录>/configs`
 3. 相对源码所在目录回退到仓库根的 `configs`（`runtime.Caller(0)` 推算）
-
 
 **文件与顺序**（`defaultYaml`）：
 
@@ -136,11 +132,11 @@ flowchart LR
 
 **key 归一化的直觉**：看起来不同的 key 其实是同一个（`formatKey`）：
 
-| 原始写法 | 归一化后 | 说明 |
-|---|---|---|
-| `common.chanNamePrefix.cluster` | `commonchannameprefixcluster` | yaml 点分写法 |
-| `COMMON_CHANNAMEPREFIX_CLUSTER` | 同上 | 环境变量下划线写法 |
-| `knowhere.xxx` | `knowhere.xxx`（不变） | `NotFormatPrefix` 例外 |
+| 原始写法                        | 归一化后                      | 说明                   |
+| ------------------------------- | ----------------------------- | ---------------------- |
+| `common.chanNamePrefix.cluster` | `commonchannameprefixcluster` | yaml 点分写法          |
+| `COMMON_CHANNAMEPREFIX_CLUSTER` | 同上                          | 环境变量下划线写法     |
+| `knowhere.xxx`                  | `knowhere.xxx`（不变）        | `NotFormatPrefix` 例外 |
 
 ## 多源优先级仲裁
 
@@ -181,6 +177,7 @@ GetConfig(key):
 跟一个 key 走完全程，把「四源 + 归一化 + 优先级 + overlay」串起来：
 
 以 `common.chanNamePrefix` 为例：
+
 1. `user.yaml` 写 `common.chanNamePrefix: bar` → File 源扁平化成 `commonchannameprefix = bar`（priority 21）。
 2. 同时 `export COMMON_CHANNAMEPREFIX=foo` → Env 源同一归一化 key，priority 11 < 21，**抢占**该 key。
 3. 此时 `GetConfig("common.chanNamePrefix")` 走到第 4 步回源 Env → 返回 `foo`。
@@ -192,4 +189,3 @@ GetConfig(key):
 `initConfPath` 定目录 → 选 4 个 yaml（后覆盖前）→ `FileSource` 扁平化成归一化 key/value →
 Manager 把 File/Env/Etcd 三源按「值越小优先级越高」合并（etcd > env > file，overlay 最高）→
 带缓存和定时刷新对外提供 `GetConfig`。
-
