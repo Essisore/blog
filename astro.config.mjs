@@ -33,10 +33,6 @@ export default defineConfig({
             securityLevel: "strict",
             theme: "default",
           },
-          dark: {
-            securityLevel: "strict",
-            theme: "dark",
-          },
         },
       ],
     ],

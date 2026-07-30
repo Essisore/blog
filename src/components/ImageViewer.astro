@@ -161,6 +161,21 @@
       const openViewer = () => {
         viewerImage.src = imageElement.currentSrc || imageElement.src;
         viewerImage.alt = imageElement.alt;
+        viewerImage.style.backgroundColor =
+          getComputedStyle(imageElement).backgroundColor;
+
+        // Mermaid SVGs use a percentage width internally, so preserve the
+        // dimensions generated on the source image when moving it into the
+        // standalone viewer.
+        const width = imageElement.getAttribute("width");
+        const height = imageElement.getAttribute("height");
+        width
+          ? viewerImage.setAttribute("width", width)
+          : viewerImage.removeAttribute("width");
+        height
+          ? viewerImage.setAttribute("height", height)
+          : viewerImage.removeAttribute("height");
+
         resetZoom(); // Reset zoom state when opening
         viewer.classList.remove("hidden");
         viewer.setAttribute("aria-hidden", "false");
@@ -201,6 +216,9 @@
         document.documentElement.classList.remove("image-viewer-open");
         document.body.style.overflow = "";
         viewerImage.src = "";
+        viewerImage.style.backgroundColor = "";
+        viewerImage.removeAttribute("width");
+        viewerImage.removeAttribute("height");
         resetZoom(); // Reset zoom state when closing
       }, 300);
     };
