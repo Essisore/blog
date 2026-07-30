@@ -186,11 +186,11 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
     id="zen-toggle"
     type="button"
     title="Zen mode (Z)"
-    class="bg-[color:var(--color-surface)]/90 fixed bottom-20 right-6 z-50 inline-flex h-10 w-10 items-center justify-center rounded-md border border-[var(--color-border)] font-mono text-sm font-medium text-zinc-600 shadow-sm backdrop-blur transition-colors hover:text-zinc-900 aria-pressed:border-blue-500 aria-pressed:bg-blue-50 aria-pressed:text-blue-600 dark:text-zinc-300 dark:hover:text-zinc-100 dark:aria-pressed:border-blue-400 dark:aria-pressed:bg-blue-950/40 dark:aria-pressed:text-blue-300"
+    class="bg-[color:var(--color-surface)]/90 fixed bottom-20 right-6 z-50 inline-flex h-10 min-w-10 items-center justify-center rounded-md border border-[var(--color-border)] px-2.5 font-mono text-xs font-medium text-zinc-600 shadow-sm backdrop-blur transition-all hover:text-zinc-900 aria-pressed:border-blue-500 aria-pressed:bg-blue-50 aria-pressed:text-blue-600 dark:text-zinc-300 dark:hover:text-zinc-100 dark:aria-pressed:border-blue-400 dark:aria-pressed:bg-blue-950/40 dark:aria-pressed:text-blue-300"
     aria-label="切换 Zen 阅读模式"
     aria-pressed="false"
   >
-    Z
+    <span data-zen-label>Zen</span>
   </button>
   <CodeCopyButton />
   <ImageViewer />
@@ -204,11 +204,79 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
   }
 
   html.post-zen #post-article {
-    max-width: min(100%, 72rem);
+    max-width: min(100%, 60rem);
   }
 
   html.post-zen #post-article > div {
-    padding-inline: clamp(1.5rem, 4vw, 4rem);
+    padding-block: clamp(2rem, 6vw, 5rem);
+    padding-inline: clamp(1.25rem, 5vw, 4rem);
+  }
+
+  html.post-zen #post-article > div > header,
+  html.post-zen #post-article .prose-custom > :is(p, h1, h2, h3, h4, h5, h6),
+  html.post-zen #post-article .prose-custom > :is(ul, ol, blockquote) {
+    width: 100%;
+    max-width: 42.5rem;
+    margin-inline: auto;
+  }
+
+  html.post-zen #post-article .prose-custom {
+    line-height: 1.75;
+  }
+
+  html.post-zen #post-article .prose-custom > h2 {
+    margin-top: 2.25rem;
+    margin-bottom: 0.6rem;
+    font-size: 1.125rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  html.post-zen #post-article .prose-custom > h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.5;
+  }
+
+  html.post-zen #post-article .prose-custom > :is(h4, h5, h6) {
+    margin-top: 1.15rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+  }
+
+  html.post-zen #post-article .prose-custom > :is(ul, ol) {
+    margin-block: 0.65rem 1rem;
+    padding-left: 1.4rem;
+  }
+
+  html.post-zen #post-article .prose-custom li {
+    margin-block: 0.3rem;
+    padding-left: 0.2rem;
+  }
+
+  html.post-zen #post-article .prose-custom li::marker {
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  html.post-zen #post-article .prose-custom li > :is(ul, ol) {
+    margin-block: 0.25rem 0.4rem;
+  }
+
+  html.post-zen #post-article .prose-custom p {
+    margin-block: 0.55rem;
+  }
+
+  html.post-zen #post-article .prose-custom :is(h2, h3, h4, h5, h6) + p,
+  html.post-zen
+    #post-article
+    .prose-custom
+    :is(h2, h3, h4, h5, h6)
+    + :is(ul, ol) {
+    margin-top: 0.35rem;
   }
 
   html.post-zen #post-article .prose-custom img {
@@ -238,13 +306,24 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
     display: none;
   }
 
-  html.post-zen #zen-toggle,
   html.post-zen #scroll-progress,
   html.post-zen #back-to-top,
   html.post-zen #post-nav,
-  html.post-zen .copy-button,
   html.post-zen .language-tag {
     display: none;
+  }
+
+  html.post-zen #zen-toggle {
+    top: 1rem;
+    right: 1rem;
+    bottom: auto;
+  }
+
+  @media (max-width: 640px) {
+    html.post-zen #zen-toggle {
+      top: 0.75rem;
+      right: 0.75rem;
+    }
   }
 </style>
 
@@ -257,6 +336,19 @@ const pageTitle = `${post.data.title} - ${SITE_TITLE}`;
     const button = document.getElementById("zen-toggle");
     if (button) {
       button.setAttribute("aria-pressed", String(enabled));
+      button.setAttribute(
+        "aria-label",
+        enabled ? "退出 Zen 阅读模式" : "进入 Zen 阅读模式",
+      );
+      button.setAttribute(
+        "title",
+        enabled ? "退出 Zen 模式 (Esc)" : "进入 Zen 模式 (Z)",
+      );
+
+      const label = button.querySelector("[data-zen-label]");
+      if (label) {
+        label.textContent = enabled ? "退出 · Esc" : "Zen";
+      }
     }
 
     if (typeof localStorage !== "undefined") {
